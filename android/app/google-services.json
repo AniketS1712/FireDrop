@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "502105268327",
+    "project_id": "firedrop-b56e3",
+    "storage_bucket": "firedrop-b56e3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502105268327:android:d143a6a8f764af7cceb4c2",
+        "android_client_info": {
+          "package_name": "com.example.firedrop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "502105268327-ds3hcf797b7jp6o9ud1tin1e7n5tm435.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.firedrop",
+            "certificate_hash": "3cfc111a3828ed323c67378d16a15c9759795d39"
+          }
+        },
+        {
+          "client_id": "502105268327-qsnm4b45mnb8np17ek0qjg7hqrif3upt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1FQx_1OWKHUA2IdwAj3dwsls9NEsTENI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "502105268327-aiifuh5fhbdpmmj44nbrcjetubnjss17.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "502105268327-f2q62fiq5f8h58mgreaat37gs5vihsng.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.firedrop"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
