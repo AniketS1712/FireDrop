@@ -1,13 +1,6 @@
 enum UserRole { player, organizer, admin }
 
-enum TournamentStatus {
-  draft,
-  registrationOpen,
-  upcoming,
-  live,
-  completed,
-  cancelled,
-}
+enum TournamentStatus { draft, registrationOpen, upcoming, live, completed }
 
 enum TournamentType { solo, duo, squad }
 

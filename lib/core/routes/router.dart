@@ -1,7 +1,7 @@
 import 'package:firedrop/core/constant/app_enums.dart';
 import 'package:firedrop/core/routes/app_routes.dart';
 import 'package:firedrop/core/routes/route_paths.dart';
-import 'package:firedrop/presentation/providers/auth_providers.dart';
+import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

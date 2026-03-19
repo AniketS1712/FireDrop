@@ -9,7 +9,7 @@ class AppTypography {
 
   // ================= BASE TEXT THEME =================
   static const TextTheme base = TextTheme(
-    // ===== DISPLAY =====
+    // ===== DISPLAY (Brand / Hero only) =====
     displayLarge: TextStyle(
       fontFamily: displayFont,
       fontSize: 40,
@@ -32,26 +32,26 @@ class AppTypography {
       height: 1.25,
     ),
 
-    // ===== HEADLINES =====
+    // ===== HEADLINES (Screen-level importance) =====
     headlineLarge: TextStyle(
-      fontFamily: primaryFont,
-      fontSize: 22,
+      fontFamily: displayFont,
+      fontSize: 24,
       fontWeight: FontWeight.w700,
     ),
 
     headlineMedium: TextStyle(
-      fontFamily: primaryFont,
+      fontFamily: displayFont,
       fontSize: 20,
       fontWeight: FontWeight.w600,
     ),
 
     headlineSmall: TextStyle(
       fontFamily: primaryFont,
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: FontWeight.w600,
     ),
 
-    // ===== TITLES =====
+    // ===== TITLES (Component-level importance) =====
     titleLarge: TextStyle(
       fontFamily: primaryFont,
       fontSize: 18,
@@ -73,7 +73,7 @@ class AppTypography {
       height: 1.2,
     ),
 
-    // ===== BODY =====
+    // ===== BODY (Content text) =====
     bodyLarge: TextStyle(
       fontFamily: primaryFont,
       fontSize: 16,
@@ -95,9 +95,9 @@ class AppTypography {
       height: 1.4,
     ),
 
-    // ===== LABELS =====
+    // ===== LABELS (Content text) =====
     labelLarge: TextStyle(
-      fontFamily: primaryFont,
+      fontFamily: displayFont,
       fontSize: 14,
       fontWeight: FontWeight.w600,
       letterSpacing: 0.5,
