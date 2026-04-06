@@ -1,6 +1,7 @@
-import 'package:firedrop/core/theme/app_colors.dart';
+// import 'package:firedrop/core/theme/app_colors.dart';
 import 'package:firedrop/core/theme/app_sizes.dart';
 import 'package:firedrop/shared/models/leaderboard_entry.dart';
+import 'package:firedrop/shared/models/leaderboard_template.dart';
 import 'package:firedrop/shared/models/tournaments_model.dart';
 import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
 import 'package:firedrop/features/leaderboard/presentation/providers/leaderboard_providers.dart';
@@ -9,11 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ─── Column width constants ───────────────────────────────────────────────────
-const double _colTeam = 140.0;
-const double _colPosition = 80.0;
-const double _colKills = 80.0;
-const double _colPoints = 80.0;
-const double _colRank = 64.0;
+const double _colPosition = 72.0;
+const double _colKills = 72.0;
+const double _colPoints = 72.0;
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 class LeaderboardScreen extends ConsumerStatefulWidget {
@@ -30,6 +29,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   final List<LeaderboardEntry> _entries = [];
   bool _initialised = false;
   bool _saving = false;
+  LeaderboardTemplate _selectedTemplate = LeaderboardTemplate.classic;
 
   TournamentModel get _t => widget.tournament;
 
@@ -109,6 +109,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         createdByUid: organizer.uid,
         entries: _entries,
         isPublished: publish,
+        template: _selectedTemplate,
       );
 
       if (!mounted) return;
@@ -120,8 +121,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                 : '💾 Draft saved successfully.',
           ),
           backgroundColor: publish
-              ? AppColorTokens.primary
-              : AppColorTokens.success,
+              ? Theme.of(context).colorScheme.primary
+              : Colors.green,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -130,7 +131,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: $e'),
-          backgroundColor: AppColorTokens.error,
+          backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -141,20 +142,201 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
   // ─── Build ─────────────────────────────────────────────────────────────────
 
+  // ── Template Picker (shown before publish) ────────────────────────────────
+
+  Future<void> _showTemplatePickerThenPublish() async {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    LeaderboardTemplate? picked = _selectedTemplate;
+
+    final confirmed = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          return Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSizes.space24),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: colorScheme.outline.withAlpha(60)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Row(
+                  children: [
+                    Icon(
+                      Icons.palette_rounded,
+                      color: colorScheme.primary,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Choose Leaderboard Template',
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Select a visual style for the published leaderboard',
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: AppSizes.space24),
+
+                // Template options
+                ...kLeaderboardTemplates.map((meta) {
+                  final isSelected = picked == meta.template;
+                  return GestureDetector(
+                    onTap: () {
+                      setSheetState(() => picked = meta.template);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      margin: const EdgeInsets.only(bottom: AppSizes.space12),
+                      padding: const EdgeInsets.all(AppSizes.space16),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? colorScheme.primary.withAlpha(15)
+                            : colorScheme.onSurface.withAlpha(8),
+                        borderRadius: BorderRadius.circular(AppSizes.radius16),
+                        border: Border.all(
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant.withAlpha(30),
+                          width: isSelected ? 2 : 1,
+                        ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: colorScheme.primary.withAlpha(20),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            meta.previewIcon,
+                            style: const TextStyle(fontSize: 32),
+                          ),
+                          const SizedBox(width: AppSizes.space16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  meta.name,
+                                  style: textTheme.titleSmall?.copyWith(
+                                    color: isSelected
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurface,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  meta.description,
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isSelected)
+                            Icon(
+                              Icons.check_circle_rounded,
+                              color: colorScheme.primary,
+                              size: 24,
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+
+                const SizedBox(height: AppSizes.space16),
+
+                // Publish button
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    icon: const Icon(Icons.publish_rounded),
+                    label: const Text(
+                      'PUBLISH WITH THIS TEMPLATE',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSizes.radius16),
+                      ),
+                    ),
+                  ),
+                ),
+
+                // cancel
+                const SizedBox(height: AppSizes.space8),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    if (confirmed == true && picked != null) {
+      setState(() => _selectedTemplate = picked!);
+      await _saveLeaderboard(publish: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final teamsAsync = ref.watch(tournamentTeamsProvider(_t.id));
 
     return Scaffold(
-      backgroundColor: AppColorTokens.bgPrimary,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: teamsAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColorTokens.primary),
+        loading: () => Center(
+          child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary),
         ),
         error: (e, _) => Center(
           child: Text(
             'Error: $e',
-            style: const TextStyle(color: AppColorTokens.error),
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ),
         data: (teams) {
@@ -180,7 +362,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
               _buildPointsLegend(),
               const SizedBox(height: 8),
               _buildHeaderRow(),
-              const Divider(height: 1, color: AppColorTokens.border),
+              Divider(height: 2, color: Theme.of(context).colorScheme.outline),
               Expanded(
                 child: _entries.isEmpty
                     ? _buildEmptyState()
@@ -198,7 +380,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
   Widget _buildAppBar(BuildContext context) {
     return Container(
-      color: AppColorTokens.bgSecondary,
+      color: Theme.of(context).colorScheme.surface,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 8,
         left: 8,
@@ -209,19 +391,19 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back_ios_rounded,
-              color: AppColorTokens.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'LEADERBOARD',
                   style: TextStyle(
-                    color: AppColorTokens.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 2,
@@ -247,8 +429,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             icon: Icon(
               Icons.info_outline_rounded,
               color: _showLegend
-                  ? AppColorTokens.primary
-                  : AppColorTokens.textSecondary,
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -265,7 +447,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
-      color: AppColorTokens.bgTertiary,
+      color: Theme.of(context).colorScheme.surface,
       padding: const EdgeInsets.symmetric(
         horizontal: AppSizes.space16,
         vertical: 12,
@@ -275,16 +457,16 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.emoji_events_rounded,
-                color: AppColorTokens.gold,
+                color: Theme.of(context).colorScheme.primary,
                 size: 16,
               ),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 'POSITION POINTS',
                 style: TextStyle(
-                  color: AppColorTokens.gold,
+                  color: Theme.of(context).colorScheme.primary,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
@@ -293,8 +475,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
               const Spacer(),
               Text(
                 'Kill = $kKillPoints pt each',
-                style: const TextStyle(
-                  color: AppColorTokens.primary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
@@ -312,9 +494,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColorTokens.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                  border: Border.all(color: AppColorTokens.border),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
                 child: Text(
                   '#${e.key} → ${e.value} pts',
@@ -336,39 +518,34 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
   Widget _buildHeaderRow() {
     return Container(
-      color: AppColorTokens.bgSecondary,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _headerCell('TEAM', _colTeam, TextAlign.left),
-            _headerCell('POS', _colPosition, TextAlign.center),
-            _headerCell('KILLS', _colKills, TextAlign.center),
-            _headerCell('POINTS', _colPoints, TextAlign.center),
-            _headerCell('RANK', _colRank, TextAlign.center),
-          ],
-        ),
+      color: Theme.of(context).colorScheme.surface,
+      child: Row(
+        children: [
+          Expanded(child: _headerCell('TEAM', TextAlign.left)),
+          _headerCell('POS', TextAlign.center, width: _colPosition),
+          _headerCell('KILLS', TextAlign.center, width: _colKills),
+          _headerCell('POINTS', TextAlign.center, width: _colPoints),
+        ],
       ),
     );
   }
 
-  Widget _headerCell(String label, double width, TextAlign align) {
-    return SizedBox(
-      width: width,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        child: Text(
-          label,
-          textAlign: align,
-          style: const TextStyle(
-            color: AppColorTokens.primary,
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.2,
-          ),
+  Widget _headerCell(String label, TextAlign align, {double? width}) {
+    final cell = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Text(
+        label,
+        textAlign: align,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2,
         ),
       ),
     );
+    if (width != null) return SizedBox(width: width, child: cell);
+    return cell;
   }
 
   // ── Table ──────────────────────────────────────────────────────────────────
@@ -380,52 +557,51 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     final sorted = List<LeaderboardEntry>.from(_entries)
       ..sort((a, b) => a.rank.compareTo(b.rank));
 
-    return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 100),
-      itemCount: sorted.length,
-      separatorBuilder: (context, index) =>
-          const Divider(height: 1, color: AppColorTokens.border),
-      itemBuilder: (context, i) {
-        final entry = sorted[i];
-        final leaderName =
-            leaderNames[entry.leaderId] ?? entry.leaderId.substring(0, 6);
-        return _LeaderboardRow(
-          entry: entry,
-          leaderName: leaderName,
-          rank: entry.rank,
-          onPositionChanged: (v) {
-            setState(() {
-              entry.position = v;
-              _recomputeRanks();
-            });
-          },
-          onKillsChanged: (v) {
-            setState(() {
-              entry.kills = v;
-              _recomputeRanks();
-            });
-          },
-        );
-      },
+    return Column(
+      children: [
+        for (int i = 0; i < sorted.length; i++) ...[
+          _LeaderboardRow(
+            entry: sorted[i],
+            leaderName:
+                leaderNames[sorted[i].leaderId] ??
+                sorted[i].leaderId.substring(0, 6),
+            rank: sorted[i].rank,
+            onPositionChanged: (v) {
+              setState(() {
+                sorted[i].position = v;
+                _recomputeRanks();
+              });
+            },
+            onKillsChanged: (v) {
+              setState(() {
+                sorted[i].kills = v;
+                _recomputeRanks();
+              });
+            },
+          ),
+          if (i < sorted.length - 1)
+            Divider(height: 1, color: Theme.of(context).colorScheme.outline),
+        ],
+      ],
     );
   }
 
   // ── Empty state ────────────────────────────────────────────────────────────
 
   Widget _buildEmptyState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             Icons.groups_outlined,
-            color: AppColorTokens.textDisabled,
+            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
             size: 56,
           ),
           SizedBox(height: 12),
           Text(
             'No teams registered yet.',
-            style: TextStyle(color: AppColorTokens.textSecondary, fontSize: 15),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 15),
           ),
         ],
       ),
@@ -442,9 +618,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         top: 12,
         bottom: MediaQuery.of(context).padding.bottom + 12,
       ),
-      decoration: const BoxDecoration(
-        color: AppColorTokens.bgSecondary,
-        border: Border(top: BorderSide(color: AppColorTokens.border)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outline)),
       ),
       child: Row(
         children: [
@@ -453,7 +629,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             child: _BottomBtn(
               label: 'Save Draft',
               icon: Icons.save_outlined,
-              color: AppColorTokens.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               loading: _saving,
               onTap: () => _saveLeaderboard(publish: false),
             ),
@@ -465,9 +641,9 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             child: _BottomBtn(
               label: 'Publish Results',
               icon: Icons.emoji_events_rounded,
-              color: AppColorTokens.primary,
+              color: Theme.of(context).colorScheme.primary,
               loading: _saving,
-              onTap: () => _saveLeaderboard(publish: true),
+              onTap: () => _showTemplatePickerThenPublish(),
             ),
           ),
         ],
@@ -499,7 +675,6 @@ class _LeaderboardRow extends StatefulWidget {
 class _LeaderboardRowState extends State<_LeaderboardRow> {
   late final TextEditingController _posCtrl;
   late final TextEditingController _killsCtrl;
-  bool _membersExpanded = false;
 
   @override
   void initState() {
@@ -539,192 +714,112 @@ class _LeaderboardRowState extends State<_LeaderboardRow> {
 
   // ── Rank accent colour ─────────────────────────────────────────────────────
   Color _rankColor(int rank) {
-    if (rank == 1) return AppColorTokens.gold;
+    if (rank == 1) return Theme.of(context).colorScheme.primary;
     if (rank == 2) return const Color(0xFFC0C0C0);
     if (rank == 3) return const Color(0xFFCD7F32);
-    return AppColorTokens.textSecondary;
+    return Theme.of(context).colorScheme.onSurfaceVariant;
   }
 
   @override
   Widget build(BuildContext context) {
     final isTop3 = widget.rank <= 3 && widget.rank > 0;
 
-    return Column(
-      children: [
-        // ── Main row ────────────────────────────────────────────────────────
-        Container(
-          color: isTop3
-              ? _rankColor(widget.rank).withAlpha(13)
-              : Colors.transparent,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // ── Team name + member expand ──────────────────────────────
-                SizedBox(
-                  width: _colTeam,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          onTap: () => setState(
-                            () => _membersExpanded = !_membersExpanded,
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  widget.entry.teamName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Icon(
-                                _membersExpanded
-                                    ? Icons.expand_less
-                                    : Icons.expand_more,
-                                size: 14,
-                                color: AppColorTokens.textSecondary,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+    // ── Main row ──────────────────────────────────────────────────────────────
+    return Container(
+      color: isTop3
+          ? _rankColor(widget.rank).withAlpha(13)
+          : Colors.transparent,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // ── Rank indicator (left accent) ──────────────────────────────────
+          Container(
+            width: 4,
+            height: 56,
+            color: isTop3 ? _rankColor(widget.rank) : Colors.transparent,
+          ),
 
-                // ── Position (editable) ────────────────────────────────────
-                SizedBox(
-                  width: _colPosition,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: _NumberCell(
-                      controller: _posCtrl,
-                      hint: '—',
-                      onChanged: (v) {
-                        final parsed = int.tryParse(v);
-                        widget.onPositionChanged(parsed ?? 0);
-                      },
+          // ── Team name ─────────────────────────────────────────────────────
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.entry.teamName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-
-                // ── Kills (editable) ──────────────────────────────────────
-                SizedBox(
-                  width: _colKills,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: _NumberCell(
-                      controller: _killsCtrl,
-                      hint: '0',
-                      onChanged: (v) {
-                        final parsed = int.tryParse(v);
-                        widget.onKillsChanged(parsed ?? 0);
-                      },
-                    ),
-                  ),
-                ),
-
-                // ── Total points (auto) ────────────────────────────────────
-                SizedBox(
-                  width: _colPoints,
-                  child: Center(
-                    child: Text(
-                      '${widget.entry.totalPoints}',
-                      style: const TextStyle(
-                        color: AppColorTokens.primary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                  if (isTop3)
+                    Text(
+                      widget.rank == 1
+                          ? '🥇 1st Place'
+                          : widget.rank == 2
+                          ? '🥈 2nd Place'
+                          : '🥉 3rd Place',
+                      style: TextStyle(
+                        color: _rankColor(widget.rank),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-                ),
-
-                // ── Rank badge ─────────────────────────────────────────────
-                SizedBox(
-                  width: _colRank,
-                  child: Center(
-                    child: widget.rank > 0
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _rankColor(widget.rank).withAlpha(30),
-                              borderRadius: BorderRadius.circular(
-                                AppSizes.radiusFull,
-                              ),
-                              border: Border.all(
-                                color: _rankColor(widget.rank).withAlpha(128),
-                              ),
-                            ),
-                            child: Text(
-                              '#${widget.rank}',
-                              style: TextStyle(
-                                color: _rankColor(widget.rank),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          )
-                        : const Text(
-                            '—',
-                            style: TextStyle(
-                              color: AppColorTokens.textDisabled,
-                              fontSize: 13,
-                            ),
-                          ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
 
-        // ── Members dropdown ─────────────────────────────────────────────────
-        if (_membersExpanded)
-          Container(
-            width: double.infinity,
-            color: AppColorTokens.bgTertiary,
-            padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'TEAM MEMBERS',
-                  style: TextStyle(
-                    color: AppColorTokens.primary,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: widget.entry.memberUids.map((uid) {
-                    final isLeader = uid == widget.entry.leaderId;
-                    return _MemberChip(uid: uid, isLeader: isLeader);
-                  }).toList(),
-                ),
-              ],
+          // ── Position (editable) ───────────────────────────────────────────
+          SizedBox(
+            width: _colPosition,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: _NumberCell(
+                controller: _posCtrl,
+                hint: '—',
+                onChanged: (v) {
+                  widget.onPositionChanged(int.tryParse(v) ?? 0);
+                },
+              ),
             ),
           ),
-      ],
+
+          // ── Kills (editable) ──────────────────────────────────────────────
+          SizedBox(
+            width: _colKills,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: _NumberCell(
+                controller: _killsCtrl,
+                hint: '0',
+                onChanged: (v) {
+                  widget.onKillsChanged(int.tryParse(v) ?? 0);
+                },
+              ),
+            ),
+          ),
+
+          // ── Total points (auto) ───────────────────────────────────────────
+          SizedBox(
+            width: _colPoints,
+            child: Center(
+              child: Text(
+                '${widget.entry.totalPoints}',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -758,83 +853,29 @@ class _NumberCell extends StatelessWidget {
         onChanged: onChanged,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(
-            color: AppColorTokens.textDisabled,
+          hintStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
             fontSize: 14,
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 8),
           filled: true,
-          fillColor: AppColorTokens.bgTertiary,
+          fillColor: Theme.of(context).colorScheme.surface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius8),
-            borderSide: const BorderSide(color: AppColorTokens.border),
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius8),
-            borderSide: const BorderSide(color: AppColorTokens.border),
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSizes.radius8),
-            borderSide: const BorderSide(
-              color: AppColorTokens.primary,
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
               width: 1.5,
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ─── Member chip (resolves uid → name) ───────────────────────────────────────
-class _MemberChip extends ConsumerWidget {
-  final String uid;
-  final bool isLeader;
-
-  const _MemberChip({required this.uid, required this.isLeader});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userAsync = ref.watch(userByIdProvider(uid));
-
-    final name = userAsync.maybeWhen(
-      data: (u) => u?.name ?? uid.substring(0, 8),
-      orElse: () => '…',
-    );
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: isLeader
-            ? AppColorTokens.primary.withAlpha(25)
-            : AppColorTokens.surface,
-        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-        border: Border.all(
-          color: isLeader
-              ? AppColorTokens.primary.withAlpha(128)
-              : AppColorTokens.border,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isLeader) ...[
-            const Icon(
-              Icons.star_rounded,
-              color: AppColorTokens.gold,
-              size: 12,
-            ),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            name,
-            style: TextStyle(
-              color: isLeader ? AppColorTokens.primary : Colors.white,
-              fontSize: 11,
-              fontWeight: isLeader ? FontWeight.w700 : FontWeight.w400,
-            ),
-          ),
-        ],
       ),
     );
   }

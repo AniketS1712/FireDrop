@@ -10,7 +10,7 @@ class QuickManagement extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorsScheme = theme.colorScheme;
+    final colorScheme = theme.colorScheme;
     final textScheme = theme.textTheme;
 
     return Padding(
@@ -25,10 +25,13 @@ class QuickManagement extends StatelessWidget {
         children: [
           Text(
             'Quick Management',
-            style: textScheme.titleLarge?.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
+            style: textScheme.headlineLarge?.copyWith(
+              shadows: [
+                Shadow(color: colorScheme.primary, blurRadius: 10),
+                Shadow(color: colorScheme.primary, blurRadius: 10),
+                Shadow(color: colorScheme.primary, blurRadius: 10),
+                Shadow(color: colorScheme.secondary, blurRadius: 20),
+              ],
             ),
           ),
           const SizedBox(height: AppSizes.space16),
@@ -43,13 +46,13 @@ class QuickManagement extends StatelessWidget {
               _QuickManagementCard(
                 title: 'Create\nTournament',
                 icon: Icons.add_rounded,
-                color: colorsScheme.primary,
+                color: colorScheme.primary,
                 onTap: onTapCreate,
               ),
               _QuickManagementCard(
                 title: 'Analytics\nReports',
                 icon: Icons.bar_chart_rounded,
-                color: colorsScheme.secondary,
+                color: colorScheme.secondary,
                 onTap: onTapReports,
               ),
             ],
@@ -82,9 +85,13 @@ class _QuickManagementCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color.withAlpha(12),
+          color: color.withAlpha(10),
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          border: Border.all(color: color.withAlpha(80), width: 1),
+          border: Border.all(color: color),
+          boxShadow: [
+            BoxShadow(color: color.withAlpha(50), blurRadius: 10),
+            BoxShadow(color: Colors.black38),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -94,17 +101,22 @@ class _QuickManagementCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: color.withAlpha(30),
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: color,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+                boxShadow: [
+                  BoxShadow(color: color.withAlpha(30), blurRadius: 10),
+                  BoxShadow(color: color.withAlpha(30), blurRadius: 10),
+                ],
               ),
               child: Icon(icon, color: color, size: AppSizes.iconXl),
             ),
-            const SizedBox(height: AppSizes.space12),
+            const SizedBox(height: AppSizes.space8),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: textScheme.titleSmall?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-              ),
+              style: textScheme.titleMedium,
             ),
           ],
         ),

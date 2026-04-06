@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firedrop/core/theme/app_colors.dart';
 import 'package:firedrop/core/theme/app_sizes.dart';
 import 'package:firedrop/shared/models/tournaments_model.dart';
 import 'package:firedrop/features/team/presentation/providers/team_providers.dart';
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
 
+/// ─── Join Room Screen ──────────────────────────────────────────────────────
+/// Allows a user to join an existing team room using a 6-character invite code.
 class JoinRoomScreen extends ConsumerStatefulWidget {
   final TournamentModel tournament;
 
@@ -23,46 +22,36 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
   bool _isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _teamCodeController.dispose();
     super.dispose();
   }
 
+  // ═══════════════════════ MAIN ACTION ═══════════════════════
+
   Future<void> _onJoinTeam() async {
     if (_isLoading) return;
+    if (!_formKey.currentState!.validate()) return;
 
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
 
-      try {
-        if (widget.tournament.entryFee > 0) {
-          if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
-            // Bypass Razorpay for unsupported test platforms
-            await _joinTeamOnServer();
-          } else {
-            // _startPayment(widget.tournament.entryFee);
-            await _joinTeamOnServer();
-          }
-        } else {
-          await _joinTeamOnServer();
-        }
-      } catch (e) {
-        if (mounted) setState(() => _isLoading = false);
-      }
+    try {
+      await _joinTeamOnServer();
+    } catch (e) {
+      _handleError(e.toString());
     }
   }
+
+  // ═══════════════════════ JOIN TEAM ═══════════════════════
 
   Future<void> _joinTeamOnServer() async {
     final String code = _teamCodeController.text.trim();
 
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) throw Exception("User not logged in");
+      if (userId == null) throw Exception('User not logged in');
 
       int maxMembers = 4;
       switch (widget.tournament.gameMode) {
@@ -77,7 +66,7 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
           break;
       }
 
-      await ref
+      final team = await ref
           .read(teamServiceProvider)
           .joinTeamRoom(
             tournamentId: widget.tournament.id,
@@ -89,7 +78,7 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
             const Duration(seconds: 15),
             onTimeout: () {
               throw Exception(
-                "Request timed out. Please check your internet connection.",
+                'Request timed out. Please check your internet connection.',
               );
             },
           );
@@ -97,8 +86,8 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Successfully joined via code: $code!'),
-          backgroundColor: AppColorTokens.success,
+          content: Text('Successfully joined team "${team.name}"!'),
+          backgroundColor: Colors.green,
         ),
       );
 
@@ -107,27 +96,54 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to join team: \${e.toString()}'),
-            backgroundColor: AppColorTokens.error,
+            content: Text('Failed to join team: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
+
+  // ═══════════════════════ ERROR HANDLING ═══════════════════════
+
+  void _handleError(String error) {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'RETRY',
+          textColor: Colors.white,
+          onPressed: _onJoinTeam,
+        ),
+      ),
+    );
+  }
+
+  // ═══════════════════════ BUILD ═══════════════════════
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorTokens.bgPrimary,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: AppColorTokens.bgPrimary,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: _isLoading ? null : () => Navigator.pop(context),
         ),
         title: const Text(
           'Join Room',
@@ -147,28 +163,29 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
             children: [
               Text(
                 'Join ${widget.tournament.title}',
-                style: const TextStyle(
-                  color: AppColorTokens.primary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 0.5,
                 ),
               ),
               const SizedBox(height: AppSizes.space8),
-              const Text(
+              Text(
                 'Enter the 6-character team code provided by your captain to join their room.',
                 style: TextStyle(
-                  color: AppColorTokens.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 14,
                   height: 1.5,
                 ),
               ),
+
               const SizedBox(height: AppSizes.space48),
 
-              const Text(
+              Text(
                 'TEAM CODE',
                 style: TextStyle(
-                  color: AppColorTokens.textSecondary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 11,
                   letterSpacing: 2.0,
                   fontWeight: FontWeight.w700,
@@ -179,27 +196,45 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
 
               const SizedBox(height: AppSizes.space48),
 
+              // ── Join Team Button ──────────────────────────────────────
               SizedBox(
                 width: double.infinity,
                 child: GestureDetector(
-                  onTap: _onJoinTeam,
-                  child: Container(
+                  onTap: _isLoading ? null : _onJoinTeam,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
                     height: 56,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppColorTokens.secondaryLight,
-                          AppColorTokens.secondary,
-                        ],
+                      gradient: LinearGradient(
+                        colors: _isLoading
+                            ? [
+                                Theme.of(context)
+                                    .colorScheme
+                                    .onSecondaryContainer
+                                    .withAlpha(150),
+                                Theme.of(
+                                  context,
+                                ).colorScheme.secondary.withAlpha(150),
+                              ]
+                            : [
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onSecondaryContainer,
+                                Theme.of(context).colorScheme.secondary,
+                              ],
                       ),
                       borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColorTokens.secondary.withAlpha(100),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      boxShadow: _isLoading
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.secondary.withAlpha(100),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                     ),
                     alignment: Alignment.center,
                     child: _isLoading
@@ -230,40 +265,48 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
     );
   }
 
+  // ═══════════════════════ CODE TEXT FIELD ═══════════════════════
+
   Widget _buildCodeTextField() {
     return TextFormField(
       controller: _teamCodeController,
+      enabled: !_isLoading,
       textCapitalization: TextCapitalization.characters,
-      style: const TextStyle(
-        color: AppColorTokens.primary,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.primary,
         fontSize: 28,
         fontWeight: FontWeight.bold,
         letterSpacing: 8.0,
       ),
       decoration: InputDecoration(
         hintText: 'XXXXXX',
-        hintStyle: TextStyle(color: AppColorTokens.primary.withAlpha(50)),
-        prefixIcon: const Icon(
+        hintStyle: TextStyle(
+          color: Theme.of(context).colorScheme.primary.withAlpha(50),
+        ),
+        prefixIcon: Icon(
           Icons.vpn_key_outlined,
-          color: AppColorTokens.primary,
+          color: Theme.of(context).colorScheme.primary,
         ),
         filled: true,
-        fillColor: AppColorTokens.surface,
+        fillColor: Theme.of(context).colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          borderSide: const BorderSide(color: AppColorTokens.border),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          borderSide: const BorderSide(color: AppColorTokens.border),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          borderSide: const BorderSide(color: AppColorTokens.primary, width: 2),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 2,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          borderSide: const BorderSide(color: AppColorTokens.error),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
         ),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 24,

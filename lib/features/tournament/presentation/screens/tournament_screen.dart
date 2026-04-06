@@ -7,7 +7,6 @@ import 'package:firedrop/features/team/presentation/screens/team_selection_scree
 import 'package:firedrop/features/team/presentation/screens/my_team_screen.dart';
 import 'package:firedrop/shared/models/tournaments_model.dart';
 import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/core/theme/app_colors.dart';
 import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
 import 'package:firedrop/features/team/presentation/providers/team_providers.dart';
 import 'package:firedrop/features/tournament/presentation/providers/tournament_providers.dart';
@@ -751,14 +750,16 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColorTokens.gold.withAlpha(25),
-              AppColorTokens.primary.withAlpha(15),
+              Theme.of(context).colorScheme.primary.withAlpha(25),
+              Theme.of(context).colorScheme.primary.withAlpha(15),
             ],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          border: Border.all(color: AppColorTokens.gold.withAlpha(100)),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.primary.withAlpha(100),
+          ),
         ),
         child: Row(
           children: [
@@ -766,12 +767,12 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColorTokens.gold.withAlpha(30),
+                color: Theme.of(context).colorScheme.primary.withAlpha(30),
                 borderRadius: BorderRadius.circular(AppSizes.radius16),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.emoji_events_rounded,
-                color: AppColorTokens.gold,
+                color: Theme.of(context).colorScheme.primary,
                 size: 26,
               ),
             ),
@@ -791,17 +792,14 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen> {
                   SizedBox(height: 3),
                   Text(
                     'Tap to view the full results & standings',
-                    style: TextStyle(
-                      color: AppColorTokens.textSecondary,
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios_rounded,
-              color: AppColorTokens.gold,
+              color: Theme.of(context).colorScheme.primary,
               size: 16,
             ),
           ],
@@ -835,8 +833,10 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen> {
             AppSizes.space24,
           ),
           decoration: BoxDecoration(
-            color: AppColorTokens.bgSecondary,
-            border: const Border(top: BorderSide(color: AppColorTokens.border)),
+            color: Theme.of(context).colorScheme.surface,
+            border: Border(
+              top: BorderSide(color: Theme.of(context).colorScheme.outline),
+            ),
           ),
           child: GestureDetector(
             onTap: () => Navigator.push(
@@ -848,15 +848,18 @@ class _TournamentScreenState extends ConsumerState<TournamentScreen> {
             child: Container(
               height: 54,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFB8860B), AppColorTokens.gold],
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFFB8860B),
+                    Theme.of(context).colorScheme.primary,
+                  ],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
                 borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColorTokens.gold.withAlpha(80),
+                    color: Theme.of(context).colorScheme.primary.withAlpha(80),
                     blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),

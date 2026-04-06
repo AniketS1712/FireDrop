@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firedrop/shared/models/leaderboard_entry.dart';
+import 'package:firedrop/shared/models/leaderboard_template.dart';
 import 'package:firedrop/shared/models/teams_model.dart';
 import 'package:firedrop/shared/models/users_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,6 +45,7 @@ class LeaderboardService {
     required String createdByUid,
     required List<LeaderboardEntry> entries,
     required bool isPublished,
+    LeaderboardTemplate template = LeaderboardTemplate.classic,
   }) async {
     final sorted = List<LeaderboardEntry>.from(entries)
       ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
@@ -76,6 +78,7 @@ class LeaderboardService {
       'createdBy': createdByUid,
       'standings': standings,
       'isPublished': isPublished,
+      'template': template.name,
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }

@@ -55,6 +55,7 @@ class _OrganizerDashboardScreenState
     final organizer = ref.read(currentUserProvider).value;
     if (organizer == null) return;
     await showModalBottomSheet(
+      showDragHandle: true,
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

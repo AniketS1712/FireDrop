@@ -28,9 +28,13 @@ class StatsGrid extends StatelessWidget {
         children: [
           Text(
             'Performance Stats',
-            style: textScheme.titleLarge?.copyWith(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
+            style: textScheme.headlineLarge?.copyWith(
+              shadows: [
+                Shadow(color: colorScheme.primary, blurRadius: 10),
+                Shadow(color: colorScheme.primary, blurRadius: 10),
+                Shadow(color: colorScheme.primary, blurRadius: 10),
+                Shadow(color: colorScheme.secondary, blurRadius: 20),
+              ],
             ),
           ),
           const SizedBox(height: AppSizes.space16),
@@ -87,16 +91,23 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: color.withAlpha(15),
+        color: color.withAlpha(10),
         borderRadius: BorderRadius.circular(AppSizes.radius16),
-        border: Border.all(color: color.withAlpha(160)),
+        border: Border.all(color: color),
+        boxShadow: [
+          BoxShadow(color: color.withAlpha(50), blurRadius: 10),
+          BoxShadow(color: Colors.black26),
+        ],
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(value, style: textScheme.headlineMedium?.copyWith(fontSize: 24)),
           const SizedBox(height: 3),
-          Text(label, style: textScheme.bodyMedium),
+          Text(
+            label,
+            style: textScheme.bodyLarge?.copyWith(fontWeight: FontWeight.w800),
+          ),
         ],
       ),
     );

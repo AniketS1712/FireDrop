@@ -11,79 +11,82 @@ class HomeChips extends ConsumerWidget {
     final statusFilter = ref.watch(tournamentFilterProvider);
     final modeFilter = ref.watch(gameModeFilterProvider);
 
-    return Column(
-      children: [
-        // Row 1: Status Filters
-        Center(
-          child: Wrap(
-            spacing: AppSizes.space16,
-            runSpacing: AppSizes.space8,
-            children: [
-              _ChipItem(
-                label: 'Joined',
-                selected: statusFilter == TournamentFilter.joined,
-                onSelected: () => ref
-                    .read(tournamentFilterProvider.notifier)
-                    .setFilter(TournamentFilter.joined),
-              ),
-              _ChipItem(
-                label: 'Upcoming',
-                selected: statusFilter == TournamentFilter.upcoming,
-                onSelected: () => ref
-                    .read(tournamentFilterProvider.notifier)
-                    .setFilter(TournamentFilter.upcoming),
-              ),
-              _ChipItem(
-                label: 'Live',
-                selected: statusFilter == TournamentFilter.live,
-                onSelected: () => ref
-                    .read(tournamentFilterProvider.notifier)
-                    .setFilter(TournamentFilter.live),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSizes.space16),
+      child: Column(
+        children: [
+          // Row 1: Status Filters
+          Center(
+            child: Wrap(
+              spacing: AppSizes.space16,
+              runSpacing: AppSizes.space8,
+              children: [
+                _ChipItem(
+                  label: 'Joined',
+                  selected: statusFilter == TournamentFilter.joined,
+                  onSelected: () => ref
+                      .read(tournamentFilterProvider.notifier)
+                      .setFilter(TournamentFilter.joined),
+                ),
+                _ChipItem(
+                  label: 'Upcoming',
+                  selected: statusFilter == TournamentFilter.upcoming,
+                  onSelected: () => ref
+                      .read(tournamentFilterProvider.notifier)
+                      .setFilter(TournamentFilter.upcoming),
+                ),
+                _ChipItem(
+                  label: 'Live',
+                  selected: statusFilter == TournamentFilter.live,
+                  onSelected: () => ref
+                      .read(tournamentFilterProvider.notifier)
+                      .setFilter(TournamentFilter.live),
+                ),
+              ],
+            ),
           ),
-        ),
 
-        const SizedBox(height: AppSizes.space8),
+          const SizedBox(height: AppSizes.space8),
 
-        // Row 2: Game Mode Filters
-        Center(
-          child: Wrap(
-            spacing: AppSizes.space16,
-            runSpacing: AppSizes.space8,
-            children: [
-              _ChipItem(
-                label: 'All',
-                selected: modeFilter == GameModeFilter.all,
-                onSelected: () => ref
-                    .read(gameModeFilterProvider.notifier)
-                    .setFilter(GameModeFilter.all),
-              ),
-              _ChipItem(
-                label: 'Solo',
-                selected: modeFilter == GameModeFilter.solo,
-                onSelected: () => ref
-                    .read(gameModeFilterProvider.notifier)
-                    .setFilter(GameModeFilter.solo),
-              ),
-              _ChipItem(
-                label: 'Duo',
-                selected: modeFilter == GameModeFilter.duo,
-                onSelected: () => ref
-                    .read(gameModeFilterProvider.notifier)
-                    .setFilter(GameModeFilter.duo),
-              ),
-              _ChipItem(
-                label: 'Squad',
-                selected: modeFilter == GameModeFilter.squad,
-                onSelected: () => ref
-                    .read(gameModeFilterProvider.notifier)
-                    .setFilter(GameModeFilter.squad),
-              ),
-            ],
+          // Row 2: Game Mode Filters
+          Center(
+            child: Wrap(
+              spacing: AppSizes.space16,
+              runSpacing: AppSizes.space8,
+              children: [
+                _ChipItem(
+                  label: 'All',
+                  selected: modeFilter == GameModeFilter.all,
+                  onSelected: () => ref
+                      .read(gameModeFilterProvider.notifier)
+                      .setFilter(GameModeFilter.all),
+                ),
+                _ChipItem(
+                  label: 'Solo',
+                  selected: modeFilter == GameModeFilter.solo,
+                  onSelected: () => ref
+                      .read(gameModeFilterProvider.notifier)
+                      .setFilter(GameModeFilter.solo),
+                ),
+                _ChipItem(
+                  label: 'Duo',
+                  selected: modeFilter == GameModeFilter.duo,
+                  onSelected: () => ref
+                      .read(gameModeFilterProvider.notifier)
+                      .setFilter(GameModeFilter.duo),
+                ),
+                _ChipItem(
+                  label: 'Squad',
+                  selected: modeFilter == GameModeFilter.squad,
+                  onSelected: () => ref
+                      .read(gameModeFilterProvider.notifier)
+                      .setFilter(GameModeFilter.squad),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -102,14 +105,16 @@ class _ChipItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textScheme = Theme.of(context).textTheme;
 
     return ChoiceChip(
       label: Text(
         label,
-        style: TextStyle(
+        style: textScheme.headlineMedium?.copyWith(
           color: selected
               ? colorScheme.onPrimary
               : colorScheme.onPrimaryContainer,
+          fontSize: 16,
         ),
       ),
       selected: selected,

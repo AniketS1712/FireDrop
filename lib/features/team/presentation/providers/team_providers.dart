@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firedrop/features/team/data/repositories/team_repository.dart';
 import 'package:firedrop/features/team/data/services/team_service.dart';
@@ -40,3 +41,13 @@ final userJoinedTeamsProvider =
     final service = ref.watch(teamServiceProvider);
     yield* service.streamUserTeams(user.uid);
   });
+
+/// Streams the real-time count of teams registered for [tournamentId].
+final teamsCountProvider =
+    StreamProvider.family<int, String>((ref, tournamentId) {
+  return FirebaseFirestore.instance
+      .collection('teams')
+      .where('tournamentId', isEqualTo: tournamentId)
+      .snapshots()
+      .map((snap) => snap.size);
+});

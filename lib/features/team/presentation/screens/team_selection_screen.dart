@@ -1,6 +1,6 @@
 import 'package:firedrop/core/routes/route_names.dart';
 import 'package:flutter/material.dart';
-import 'package:firedrop/core/theme/app_colors.dart';
+// import 'package:firedrop/core/theme/app_colors.dart';
 import 'package:firedrop/core/theme/app_sizes.dart';
 import 'package:firedrop/shared/models/tournaments_model.dart';
 import 'package:go_router/go_router.dart';
@@ -13,9 +13,9 @@ class TeamSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorTokens.bgPrimary,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: AppColorTokens.bgPrimary,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
@@ -38,8 +38,8 @@ class TeamSelectionScreen extends StatelessWidget {
           children: [
             Text(
               tournament.title,
-              style: const TextStyle(
-                color: AppColorTokens.primary,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
               ),
@@ -54,10 +54,10 @@ class TeamSelectionScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSizes.space16),
-            const Text(
+            Text(
               'Choose how you want to enter the tournament.',
               style: TextStyle(
-                color: AppColorTokens.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 14,
               ),
             ),
@@ -66,7 +66,7 @@ class TeamSelectionScreen extends StatelessWidget {
               title: 'Create Room',
               description: 'Form a new squad and invite your friends to join.',
               icon: Icons.add_circle_outline,
-              accentColor: AppColorTokens.primary,
+              accentColor: Theme.of(context).colorScheme.primary,
               onTap: () {
                 context.pushNamed(RouteNames.createRoom, extra: tournament);
               },
@@ -76,7 +76,7 @@ class TeamSelectionScreen extends StatelessWidget {
               title: 'Join Room',
               description: 'Already have an invite? Enter the team code here.',
               icon: Icons.login_rounded,
-              accentColor: AppColorTokens.secondary,
+              accentColor: Theme.of(context).colorScheme.secondary,
               onTap: () {
                 context.pushNamed(RouteNames.joinRoom, extra: tournament);
               },
@@ -110,9 +110,9 @@ class _SelectionOptionCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSizes.space24),
         decoration: BoxDecoration(
-          color: AppColorTokens.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          border: Border.all(color: AppColorTokens.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
           boxShadow: [
             BoxShadow(
               color: accentColor.withAlpha(20),
@@ -148,8 +148,8 @@ class _SelectionOptionCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     description,
-                    style: const TextStyle(
-                      color: AppColorTokens.textSecondary,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 13,
                       height: 1.4,
                     ),

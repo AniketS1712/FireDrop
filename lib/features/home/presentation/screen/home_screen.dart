@@ -12,12 +12,13 @@ import 'package:firedrop/features/home/presentation/widgets/home_chips.dart';
 import 'package:firedrop/features/home/presentation/widgets/home_header.dart';
 import 'package:firedrop/shared/widgets/loading_shimmer.dart';
 import 'package:firedrop/shared/widgets/main_bottom_nav.dart';
-import 'package:firedrop/shared/widgets/match_card.dart';
+import 'package:firedrop/features/home/presentation/widgets/match_card.dart';
 import 'package:firedrop/shared/widgets/states/empty_state.dart';
 import 'package:firedrop/shared/widgets/states/error_state.dart';
 import 'package:firedrop/shared/widgets/animations/animated_tournament_card.dart';
 import 'package:firedrop/features/video/presentation/screens/videos_screen.dart';
 import 'package:firedrop/features/profile/presentation/screens/profile_screen.dart';
+import 'package:firedrop/features/home/presentation/screen/matches_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -94,7 +95,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
 
     return Scaffold(
-      extendBody: true,
       backgroundColor: Colors.transparent,
       bottomNavigationBar: MainBottomNav(
         currentIndex: _currentIndex,
@@ -198,12 +198,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
             const VideosScreen(),
 
-            const Center(
-              child: Text(
-                "Matches Screen (Coming Soon)",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+            const MatchesScreen(),
 
             const ProfileScreen(),
           ],

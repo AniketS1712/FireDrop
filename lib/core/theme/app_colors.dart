@@ -7,32 +7,26 @@ class AppColorTokens {
   static const primaryLight = Color(0xFF80F2FF);
   static const primaryDark = Color(0xFF005461);
 
-  static const secondary = Color(0xFFFF00FF);
-  static const secondaryLight = Color(0xFFFF72FF);
-  static const secondaryDark = Color(0xFFB300B3);
-
-  static const gold = Color(0xFFFFEA00);
-  static const goldDark = Color(0xFFB2A300);
-
-  static const purple = Color(0xFFB300B3);
-  static const purpleLight = Color(0xFFFF72FF);
+  static const secondary = Color(0xFF9D00FF);
+  static const secondaryLight = Color(0xFFCE80FF);
+  static const secondaryDark = Color(0xFF200034);
 
   static const bgPrimary = Color(0xFF000000);
-  static const bgSecondary = Color(0xFF1C1C1E);
-  static const bgTertiary = Color(0xFF162D28);
+  static const bgSecondary = Color(0xFF1C0E24);
+  static const bgTertiary = Color(0xFF091E22);
 
   static const surface = Color(0xFF000000);
-  static const surfaceElevated = Color(0xFF4B4B52);
+  static const surfaceElevated = Color(0xFF323232);
 
-  static const border = Color(0xFF00E5FF);
-  static const borderAccent = Color(0xFFA200FF);
+  static const border = primary;
+  static const borderAccent = secondary;
 
   static const textPrimary = Color(0xFFFFFFFF);
   static const textSecondary = Color(0xFF98989E);
   static const textDisabled = Color(0xFF606060);
 
   static const success = Color(0xFF00E676);
-  static const warning = gold;
+  static const warning = Color(0xFFFFE600);
   static const error = Color(0xFFFF3B3B);
   static const info = primary;
 }
@@ -118,10 +112,10 @@ class AppGradients extends ThemeExtension<AppGradients> {
     background: LinearGradient(
       colors: [
         AppColorTokens.bgPrimary,
+        AppColorTokens.primaryDark,
         AppColorTokens.bgTertiary,
-        Color(0xFF173E49),
       ],
-      stops: [0.0, 0.6, 1.0],
+      stops: [0.0, 0.5, 1.0],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ),
@@ -157,12 +151,6 @@ class AppColors {
     onSecondary: Colors.white,
     secondaryContainer: AppColorTokens.secondaryDark,
     onSecondaryContainer: AppColorTokens.secondaryLight,
-
-    // Tertiary — Purple undertone
-    tertiary: AppColorTokens.purple,
-    onTertiary: Colors.white,
-    tertiaryContainer: Color(0xFF2A1A4A),
-    onTertiaryContainer: AppColorTokens.purpleLight,
 
     // Surfaces
     surface: AppColorTokens.surface,

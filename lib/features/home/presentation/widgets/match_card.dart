@@ -7,7 +7,6 @@ import 'package:firedrop/core/theme/app_sizes.dart';
 class MatchCard extends ConsumerWidget {
   final TournamentModel tournament;
 
-  /// Callback for the "Register Now" button — only shown for non-live tournaments.
   final VoidCallback? onJoin;
 
   const MatchCard({super.key, required this.tournament, this.onJoin});
@@ -40,12 +39,7 @@ class MatchCard extends ConsumerWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSizes.space8),
         decoration: BoxDecoration(
-          border: Border.all(
-            color: isLive
-                ? colorScheme.primary.withValues(alpha: 0.6)
-                : colorScheme.outlineVariant,
-            width: isLive ? 1.5 : 1,
-          ),
+          border: Border.all(color: colorScheme.primary, width: 1.5),
           borderRadius: BorderRadius.circular(AppSizes.radius16),
         ),
         child: Padding(
@@ -120,31 +114,45 @@ class MatchCard extends ConsumerWidget {
                   if (!isLive)
                     Consumer(
                       builder: (context, ref, _) {
-                        final teamAsync = ref.watch(userTeamForTournamentProvider(tournament.id));
+                        final teamAsync = ref.watch(
+                          userTeamForTournamentProvider(tournament.id),
+                        );
                         final isRegistered = teamAsync.value != null;
 
                         return ElevatedButton(
                           onPressed: onJoin,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isRegistered ? colorScheme.surfaceContainerHighest : colorScheme.primaryContainer,
-                            foregroundColor: isRegistered ? colorScheme.onSurfaceVariant : colorScheme.onPrimary,
+                            backgroundColor: isRegistered
+                                ? colorScheme.surfaceContainerHighest
+                                : colorScheme.primaryContainer,
+                            foregroundColor: isRegistered
+                                ? colorScheme.onSurfaceVariant
+                                : colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               side: BorderSide(
-                                color: isRegistered ? colorScheme.outline : colorScheme.outline,
+                                color: isRegistered
+                                    ? colorScheme.outline
+                                    : colorScheme.outline,
                                 width: 1,
                               ),
-                              borderRadius: BorderRadius.circular(AppSizes.radius16),
+                              borderRadius: BorderRadius.circular(
+                                AppSizes.radius16,
+                              ),
                             ),
                           ),
                           child: Text(
                             isRegistered ? 'Registered' : 'Register Now',
                             style: textTheme.bodyMedium?.copyWith(
-                              color: isRegistered ? colorScheme.onSurfaceVariant : colorScheme.onPrimary,
-                              fontWeight: isRegistered ? FontWeight.bold : FontWeight.normal,
+                              color: isRegistered
+                                  ? colorScheme.onSurfaceVariant
+                                  : colorScheme.onPrimary,
+                              fontWeight: isRegistered
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                             ),
                           ),
                         );
-                      }
+                      },
                     )
                   else
                     // Informational chip shown for live matches
@@ -200,9 +208,10 @@ class LiveBadgeState extends State<_LiveBadge>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _pulse = Tween<double>(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override

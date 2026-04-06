@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firedrop/core/theme/app_colors.dart';
+// import 'package:firedrop/core/theme/app_colors.dart';
 import 'package:firedrop/core/theme/app_sizes.dart';
 import 'package:firedrop/shared/models/tournaments_model.dart';
 
@@ -21,7 +21,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Team Code copied to clipboard!'),
-        backgroundColor: AppColorTokens.success,
+        backgroundColor: Colors.green,
         duration: Duration(seconds: 2),
       ),
     );
@@ -30,7 +30,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorTokens.bgPrimary,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -44,12 +44,12 @@ class RegistrationSuccessScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSizes.space24),
                 decoration: BoxDecoration(
-                  color: AppColorTokens.success.withAlpha(20),
+                  color: Colors.green.withAlpha(20),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.check_circle,
-                  color: AppColorTokens.success,
+                  color: Colors.green,
                   size: 80,
                 ),
               ),
@@ -69,8 +69,8 @@ class RegistrationSuccessScreen extends StatelessWidget {
               
               Text(
                 'You have successfully created the team "$teamName" for ${tournament.title}.',
-                style: const TextStyle(
-                  color: AppColorTokens.textSecondary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 16,
                   height: 1.5,
                 ),
@@ -81,12 +81,12 @@ class RegistrationSuccessScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSizes.space24),
                 decoration: BoxDecoration(
-                  color: AppColorTokens.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(AppSizes.radius16),
-                  border: Border.all(color: AppColorTokens.border),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColorTokens.primary.withAlpha(30),
+                      color: Theme.of(context).colorScheme.primary.withAlpha(30),
                       blurRadius: 20,
                       spreadRadius: -5,
                     ),
@@ -94,10 +94,10 @@ class RegistrationSuccessScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    const Text(
+                    Text(
                       'YOUR TEAM CODE',
                       style: TextStyle(
-                        color: AppColorTokens.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 12,
                         letterSpacing: 2.0,
                         fontWeight: FontWeight.w700,
@@ -106,8 +106,8 @@ class RegistrationSuccessScreen extends StatelessWidget {
                     const SizedBox(height: AppSizes.space16),
                     Text(
                       teamCode,
-                      style: const TextStyle(
-                        color: AppColorTokens.primary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                         fontSize: 40,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 8.0,
@@ -116,11 +116,11 @@ class RegistrationSuccessScreen extends StatelessWidget {
                     const SizedBox(height: AppSizes.space24),
                     TextButton.icon(
                       onPressed: () => _copyToClipboard(context),
-                      icon: const Icon(Icons.copy, color: AppColorTokens.primary),
-                      label: const Text(
+                      icon: Icon(Icons.copy, color: Theme.of(context).colorScheme.primary),
+                      label: Text(
                         'COPY TEAM CODE',
                         style: TextStyle(
-                          color: AppColorTokens.primary,
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 1.5,
                         ),
@@ -130,7 +130,7 @@ class RegistrationSuccessScreen extends StatelessWidget {
                           horizontal: AppSizes.space24,
                           vertical: AppSizes.space16,
                         ),
-                        backgroundColor: AppColorTokens.primary.withAlpha(20),
+                        backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(20),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                         ),
@@ -141,10 +141,10 @@ class RegistrationSuccessScreen extends StatelessWidget {
               ),
               
               const SizedBox(height: AppSizes.space32),
-              const Text(
+              Text(
                 'Share this code with your friends so they can join your team.',
                 style: TextStyle(
-                  color: AppColorTokens.textDisabled,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
                   fontSize: 13,
                   fontStyle: FontStyle.italic,
                   height: 1.4,
@@ -162,15 +162,15 @@ class RegistrationSuccessScreen extends StatelessWidget {
                   },
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    side: const BorderSide(color: AppColorTokens.borderAccent, width: 2),
+                    side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'GO TO DASHBOARD',
                     style: TextStyle(
-                      color: AppColorTokens.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.5,

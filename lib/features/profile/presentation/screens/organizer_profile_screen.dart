@@ -1,27 +1,25 @@
 import 'dart:io';
 import 'dart:ui';
-import 'package:firedrop/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firedrop/core/theme/app_colors.dart';
 import 'package:firedrop/core/theme/app_sizes.dart';
 import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
-import 'package:firedrop/features/team/presentation/providers/team_providers.dart';
 import 'package:firedrop/features/tournament/presentation/providers/tournament_providers.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
 import 'package:firedrop/shared/models/users_model.dart';
 import 'package:firedrop/features/video/data/repositories/upload_repository.dart';
-import 'package:go_router/go_router.dart';
-import 'package:firedrop/core/routes/route_names.dart';
 
-class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key});
+class OrganizerProfileScreen extends ConsumerStatefulWidget {
+  const OrganizerProfileScreen({super.key});
 
   @override
-  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<OrganizerProfileScreen> createState() =>
+      _OrganizerProfileScreenState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen>
+class _OrganizerProfileScreenState
+    extends ConsumerState<OrganizerProfileScreen>
     with SingleTickerProviderStateMixin {
   bool _isUploading = false;
   late final AnimationController _fadeCtrl;
@@ -100,20 +98,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               );
             }
 
+            final uid = user.uid;
+            final tournamentsAsync =
+                ref.watch(organizerTournamentsProvider(uid));
+
             final initials = user.name.isNotEmpty
                 ? user.name
-                      .trim()
-                      .split(' ')
-                      .take(2)
-                      .map((w) => w[0].toUpperCase())
-                      .join()
-                : 'U';
+                    .trim()
+                    .split(' ')
+                    .take(2)
+                    .map((w) => w[0].toUpperCase())
+                    .join()
+                : 'O';
 
             return FadeTransition(
               opacity: _fadeAnim,
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
+                  // ── Top spacing ──
                   const SliverToBoxAdapter(
                     child: SizedBox(height: AppSizes.space48),
                   ),
@@ -128,17 +131,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     ),
                   ),
 
-                  // ── Player Stats ──
-                  SliverToBoxAdapter(child: _buildStats(context, ref)),
-
-                  // ── Recently Joined Tournaments ──
+                  // ── Organizer Stats ──
                   SliverToBoxAdapter(
-                    child: _buildRecentTournaments(context, ref),
+                    child: tournamentsAsync.when(
+                      loading: () => const Padding(
+                        padding: EdgeInsets.all(AppSizes.space32),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                      error: (_, _) => const SizedBox.shrink(),
+                      data: (tournaments) {
+                        final total = tournaments.length;
+                        final live =
+                            tournaments.where((t) => t.isLive).length;
+                        final upcoming =
+                            tournaments.where((t) => t.isUpcoming).length;
+                        final completed =
+                            tournaments.where((t) => t.isCompleted).length;
+
+                        return _OrganizerStatsSection(
+                          totalTournaments: total,
+                          liveTournaments: live,
+                          upcomingTournaments: upcoming,
+                          completedTournaments: completed,
+                        );
+                      },
+                    ),
                   ),
 
-                  // ── Settings & Support ──
+                  // ── Quick Actions ──
                   SliverToBoxAdapter(
-                    child: const _SectionTitle(title: 'SETTINGS'),
+                    child: _SectionTitle(title: 'QUICK ACTIONS'),
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
@@ -148,17 +170,64 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                       child: Column(
                         children: [
                           _GlassActionTile(
-                            icon: Icons.settings_rounded,
-                            title: 'Settings',
-                            subtitle: 'App preferences and account details',
+                            icon: Icons.edit_rounded,
+                            title: 'Edit Profile',
+                            subtitle: 'Update your name, email & avatar',
                             accentColor: colorScheme.primary,
                             onTap: () {},
                           ),
                           const SizedBox(height: AppSizes.space12),
                           _GlassActionTile(
+                            icon: Icons.notifications_active_rounded,
+                            title: 'Notifications',
+                            subtitle: 'Manage push & in-app alerts',
+                            accentColor: AppColorTokens.warning,
+                            onTap: () {},
+                          ),
+                          const SizedBox(height: AppSizes.space12),
+                          _GlassActionTile(
+                            icon: Icons.shield_rounded,
+                            title: 'Security',
+                            subtitle: 'Password & two-factor settings',
+                            accentColor: AppColorTokens.success,
+                            onTap: () {},
+                          ),
+                          const SizedBox(height: AppSizes.space12),
+                          _GlassActionTile(
+                            icon: Icons.bar_chart_rounded,
+                            title: 'Analytics',
+                            subtitle: 'Deep dive into tournament metrics',
+                            accentColor: colorScheme.secondary,
+                            onTap: () {},
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ── Account section ──
+                  SliverToBoxAdapter(
+                    child: _SectionTitle(title: 'ACCOUNT'),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.space16,
+                      ),
+                      child: Column(
+                        children: [
+                          _GlassActionTile(
                             icon: Icons.help_outline_rounded,
                             title: 'Help & Support',
-                            subtitle: 'FAQ, guides and contact',
+                            subtitle: 'FAQs, contact us, report a bug',
+                            accentColor: colorScheme.onSurfaceVariant,
+                            onTap: () {},
+                          ),
+                          const SizedBox(height: AppSizes.space12),
+                          _GlassActionTile(
+                            icon: Icons.info_outline_rounded,
+                            title: 'About FireDrop',
+                            subtitle: 'Version, licenses & credits',
                             accentColor: colorScheme.onSurfaceVariant,
                             onTap: () {},
                           ),
@@ -171,282 +240,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     ),
                   ),
 
-                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                  // ── Bottom padding ──
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 120),
+                  ),
                 ],
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStats(BuildContext context, WidgetRef ref) {
-    final joinedTeamsAsync = ref.watch(userJoinedTeamsProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.space16),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _GlassStatCard(
-                  icon: Icons.emoji_events_rounded,
-                  label: 'Total Wins',
-                  value: '0', // TODO: Implement wins
-                  accentColor: AppColorTokens.warning,
-                ),
-              ),
-              const SizedBox(width: AppSizes.space12),
-              Expanded(
-                child: _GlassStatCard(
-                  icon: Icons.sports_esports_rounded,
-                  label: 'Tournaments',
-                  value: joinedTeamsAsync.when(
-                    data: (teams) => teams.length.toString(),
-                    loading: () => '-',
-                    error: (_, _) => '0',
-                  ),
-                  accentColor: colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.space12),
-          Row(
-            children: [
-              Expanded(
-                child: _GlassStatCard(
-                  icon: Icons.account_balance_wallet_rounded,
-                  label: 'Total Earnings',
-                  value: '₹0', // TODO: Implement earnings
-                  accentColor: AppColorTokens.success,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.space24),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecentTournaments(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final joinedTeamsAsync = ref.watch(userJoinedTeamsProvider);
-    final publicAsync = ref.watch(publicTournamentsProvider);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSizes.space16,
-            0,
-            AppSizes.space16,
-            AppSizes.space8,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const _SectionTitle(
-                title: 'RECENTLY JOINED',
-                padding: EdgeInsets.zero,
-              ),
-              TextButton(
-                onPressed: () {
-                  ref
-                      .read(tournamentFilterProvider.notifier)
-                      .setFilter(TournamentFilter.joined);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Go to Home -> Joined Tab to view all'),
-                    ),
-                  );
-                },
-                child: Text(
-                  'View All',
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        joinedTeamsAsync.when(
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(AppSizes.space24),
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          error: (e, _) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.space16),
-            child: Text(
-              'Error loading tournaments: $e',
-              style: TextStyle(color: colorScheme.error),
-            ),
-          ),
-          data: (teams) {
-            if (teams.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.space16,
-                  vertical: AppSizes.space8,
-                ),
-                child: Text(
-                  'You haven\'t joined any tournaments yet.',
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-              );
-            }
-
-            return publicAsync.when(
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSizes.space24),
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              error: (e, _) => Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.space16,
-                ),
-                child: Text(
-                  'Error loading tournaments: $e',
-                  style: TextStyle(color: colorScheme.error),
-                ),
-              ),
-              data: (allTournaments) {
-                final joinedTournamentIds = teams
-                    .map((t) => t.tournamentId)
-                    .toSet();
-
-                final myTournaments = allTournaments
-                    .where((t) => joinedTournamentIds.contains(t.id))
-                    .toList();
-
-                myTournaments.sort(
-                  (a, b) => b.createdAt.compareTo(a.createdAt),
-                );
-
-                final recentThree = myTournaments.take(3).toList();
-
-                if (recentThree.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.space16,
-                      vertical: AppSizes.space8,
-                    ),
-                    child: Text(
-                      'You haven\'t joined any tournaments yet.',
-                      style: TextStyle(color: colorScheme.onSurfaceVariant),
-                    ),
-                  );
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.space16,
-                  ),
-                  child: Column(
-                    children: recentThree
-                        .map((t) => _buildMiniTournamentCard(context, t))
-                        .toList(),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-        const SizedBox(height: AppSizes.space16),
-      ],
-    );
-  }
-
-  Widget _buildMiniTournamentCard(
-    BuildContext context,
-    TournamentModel tournament,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return GestureDetector(
-      onTap: () =>
-          context.pushNamed(RouteNames.tournamentDetail, extra: tournament),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: AppSizes.space12),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppSizes.radius16),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(
-              padding: const EdgeInsets.all(AppSizes.space12),
-              decoration: BoxDecoration(
-                color: colorScheme.onSurface.withAlpha(12),
-                borderRadius: BorderRadius.circular(AppSizes.radius16),
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withAlpha(50),
-                ),
-              ),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSizes.radius8),
-                    child: Image.network(
-                      tournament.imageUrl,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        width: 60,
-                        height: 60,
-                        color: colorScheme.primaryContainer,
-                        child: Icon(
-                          Icons.videogame_asset,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSizes.space16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          tournament.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${tournament.gameMode.name.toUpperCase()} • \$${tournament.entryFee}',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
       ),
     );
@@ -471,7 +272,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           ),
         ),
         content: Text(
-          'Are you sure you want to log out?',
+          'Are you sure you want to log out of your organizer account?',
           style: textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
           ),
@@ -579,16 +380,30 @@ class _ProfileHeader extends StatelessWidget {
                 ),
                 child: isUploading
                     ? const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
+                        child:
+                            CircularProgressIndicator(color: Colors.white),
                       )
                     : user.avatarUrl.isNotEmpty
-                    ? ClipOval(
-                        child: Image.network(
-                          user.avatarUrl,
-                          fit: BoxFit.cover,
-                          width: 110,
-                          height: 110,
-                          errorBuilder: (_, _, _) => Center(
+                        ? ClipOval(
+                            child: Image.network(
+                              user.avatarUrl,
+                              fit: BoxFit.cover,
+                              width: 110,
+                              height: 110,
+                              errorBuilder: (_, _, _) => Center(
+                                child: Text(
+                                  initials,
+                                  style: TextStyle(
+                                    color: colorScheme.onPrimary,
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Center(
                             child: Text(
                               initials,
                               style: TextStyle(
@@ -599,19 +414,6 @@ class _ProfileHeader extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ),
-                      )
-                    : Center(
-                        child: Text(
-                          initials,
-                          style: TextStyle(
-                            color: colorScheme.onPrimary,
-                            fontSize: 40,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                      ),
               ),
               // Camera button
               Positioned(
@@ -626,7 +428,8 @@ class _ProfileHeader extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: colorScheme.primary,
                       shape: BoxShape.circle,
-                      border: Border.all(color: colorScheme.surface, width: 3),
+                      border:
+                          Border.all(color: colorScheme.surface, width: 3),
                       boxShadow: [
                         BoxShadow(
                           color: colorScheme.primary.withAlpha(80),
@@ -671,7 +474,10 @@ class _ProfileHeader extends StatelessWidget {
 
           // ── Role badge ──
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 8,
+            ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -680,7 +486,9 @@ class _ProfileHeader extends StatelessWidget {
                 ],
               ),
               borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-              border: Border.all(color: colorScheme.primary.withAlpha(60)),
+              border: Border.all(
+                color: colorScheme.primary.withAlpha(60),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: colorScheme.primary.withAlpha(20),
@@ -693,14 +501,13 @@ class _ProfileHeader extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.verified_user_rounded,
+                  Icons.verified_rounded,
                   color: colorScheme.primary,
                   size: 16,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  (user.role.name == "player" ? "Gamer" : user.role.name)
-                      .toUpperCase(),
+                  user.role.name.toUpperCase(),
                   style: textTheme.labelSmall?.copyWith(
                     color: colorScheme.primary,
                     fontWeight: FontWeight.w800,
@@ -727,20 +534,87 @@ class _ProfileHeader extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return '${months[date.month - 1]} ${date.year}';
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ORGANIZER STATS SECTION
+// ════════════════════════════════════════════════════════════════════════════════
+
+class _OrganizerStatsSection extends StatelessWidget {
+  final int totalTournaments;
+  final int liveTournaments;
+  final int upcomingTournaments;
+  final int completedTournaments;
+
+  const _OrganizerStatsSection({
+    required this.totalTournaments,
+    required this.liveTournaments,
+    required this.upcomingTournaments,
+    required this.completedTournaments,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.space16),
+      child: Column(
+        children: [
+          // Top row - 2 big stats
+          Row(
+            children: [
+              Expanded(
+                child: _GlassStatCard(
+                  icon: Icons.emoji_events_rounded,
+                  label: 'Total Hosted',
+                  value: '$totalTournaments',
+                  accentColor: colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: AppSizes.space12),
+              Expanded(
+                child: _GlassStatCard(
+                  icon: Icons.stream_rounded,
+                  label: 'Live Now',
+                  value: '$liveTournaments',
+                  accentColor: colorScheme.secondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.space12),
+          // Bottom row - 2 stats
+          Row(
+            children: [
+              Expanded(
+                child: _GlassStatCard(
+                  icon: Icons.schedule_rounded,
+                  label: 'Upcoming',
+                  value: '$upcomingTournaments',
+                  accentColor: AppColorTokens.warning,
+                ),
+              ),
+              const SizedBox(width: AppSizes.space12),
+              Expanded(
+                child: _GlassStatCard(
+                  icon: Icons.check_circle_outlined,
+                  label: 'Completed',
+                  value: '$completedTournaments',
+                  accentColor: AppColorTokens.success,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSizes.space24),
+        ],
+      ),
+    );
   }
 }
 
@@ -775,7 +649,10 @@ class _GlassStatCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.onSurface.withAlpha(12),
             borderRadius: BorderRadius.circular(AppSizes.radius16),
-            border: Border.all(color: accentColor.withAlpha(50), width: 1.5),
+            border: Border.all(
+              color: accentColor.withAlpha(50),
+              width: 1.5,
+            ),
             boxShadow: [
               BoxShadow(
                 color: accentColor.withAlpha(15),
@@ -799,7 +676,9 @@ class _GlassStatCard extends StatelessWidget {
                       icon,
                       color: accentColor,
                       size: 18,
-                      shadows: [Shadow(color: accentColor, blurRadius: 8)],
+                      shadows: [
+                        Shadow(color: accentColor, blurRadius: 8),
+                      ],
                     ),
                   ),
                   const Spacer(),
@@ -812,7 +691,10 @@ class _GlassStatCard extends StatelessWidget {
                   color: colorScheme.onSurface,
                   fontWeight: FontWeight.w900,
                   shadows: [
-                    Shadow(color: accentColor.withAlpha(80), blurRadius: 12),
+                    Shadow(
+                      color: accentColor.withAlpha(80),
+                      blurRadius: 12,
+                    ),
                   ],
                 ),
               ),
@@ -838,9 +720,7 @@ class _GlassStatCard extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   final String title;
-  final EdgeInsetsGeometry? padding;
-
-  const _SectionTitle({required this.title, this.padding});
+  const _SectionTitle({required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -848,14 +728,12 @@ class _SectionTitle extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Padding(
-      padding:
-          padding ??
-          const EdgeInsets.fromLTRB(
-            AppSizes.space16,
-            AppSizes.space8,
-            AppSizes.space16,
-            AppSizes.space16,
-          ),
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.space16,
+        AppSizes.space8,
+        AppSizes.space16,
+        AppSizes.space16,
+      ),
       child: Text(
         title,
         style: textTheme.labelLarge?.copyWith(
@@ -902,7 +780,9 @@ class _GlassActionTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.onSurface.withAlpha(10),
               borderRadius: BorderRadius.circular(AppSizes.radius16),
-              border: Border.all(color: accentColor.withAlpha(30)),
+              border: Border.all(
+                color: accentColor.withAlpha(30),
+              ),
             ),
             child: Row(
               children: [
@@ -916,7 +796,9 @@ class _GlassActionTile extends StatelessWidget {
                     icon,
                     color: accentColor,
                     size: 22,
-                    shadows: [Shadow(color: accentColor, blurRadius: 8)],
+                    shadows: [
+                      Shadow(color: accentColor, blurRadius: 8),
+                    ],
                   ),
                 ),
                 const SizedBox(width: AppSizes.space16),
@@ -979,7 +861,9 @@ class _LogoutTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.error.withAlpha(10),
               borderRadius: BorderRadius.circular(AppSizes.radius16),
-              border: Border.all(color: colorScheme.error.withAlpha(40)),
+              border: Border.all(
+                color: colorScheme.error.withAlpha(40),
+              ),
             ),
             child: Row(
               children: [
@@ -993,7 +877,12 @@ class _LogoutTile extends StatelessWidget {
                     Icons.logout_rounded,
                     color: colorScheme.error,
                     size: 22,
-                    shadows: [Shadow(color: colorScheme.error, blurRadius: 8)],
+                    shadows: [
+                      Shadow(
+                        color: colorScheme.error,
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: AppSizes.space16),
@@ -1010,7 +899,7 @@ class _LogoutTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Sign out of your account',
+                        'Sign out of your organizer account',
                         style: textTheme.bodySmall?.copyWith(
                           color: colorScheme.error.withAlpha(160),
                         ),

@@ -15,55 +15,58 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(title, style: textTheme.titleLarge),
-                if (showLiveDot) ...[
-                  const SizedBox(width: AppSizes.space8),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: scheme.error,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: scheme.error.withValues(alpha: 0.47),
-                          blurRadius: 4,
-                          spreadRadius: 1,
-                        ),
-                      ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSizes.space8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(title, style: textTheme.titleLarge),
+                  if (showLiveDot) ...[
+                    const SizedBox(width: AppSizes.space8),
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: colorScheme.error,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.error.withValues(alpha: 0.47),
+                            blurRadius: 4,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
               ),
-            ),
-          ],
-        ),
-        Icon(
-          Icons.arrow_forward_ios_rounded,
-          color: scheme.onSurfaceVariant,
-          size: AppSizes.iconMd,
-          fontWeight: FontWeight.w900,
-        ),
-      ],
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: colorScheme.onSurfaceVariant,
+            size: AppSizes.iconMd,
+            fontWeight: FontWeight.w900,
+          ),
+        ],
+      ),
     );
   }
 }

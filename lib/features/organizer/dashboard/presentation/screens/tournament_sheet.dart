@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:firedrop/core/theme/app_colors.dart';
 import 'package:firedrop/core/theme/app_sizes.dart';
 
 // ─── Public Entry Point ───────────────────────────────────────────────────────
@@ -131,7 +130,7 @@ class _TournamentSheetState extends ConsumerState<TournamentSheet>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Tournament created successfully! 🎉'),
-            backgroundColor: AppColorTokens.success,
+            backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -141,7 +140,7 @@ class _TournamentSheetState extends ConsumerState<TournamentSheet>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString()),
-            backgroundColor: AppColorTokens.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -155,10 +154,10 @@ class _TournamentSheetState extends ConsumerState<TournamentSheet>
   Widget themeData(BuildContext ctx, Widget? child) {
     return Theme(
       data: ThemeData.dark().copyWith(
-        colorScheme: const ColorScheme.dark(
-          primary: AppColorTokens.primary,
+        colorScheme: ColorScheme.dark(
+          primary: Theme.of(context).colorScheme.primary,
           onPrimary: Colors.black,
-          surface: AppColorTokens.surfaceElevated,
+          surface: Theme.of(context).colorScheme.surfaceContainerHighest,
           onSurface: Colors.white,
         ),
       ),
@@ -209,8 +208,8 @@ class _TournamentSheetState extends ConsumerState<TournamentSheet>
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     return SafeArea(
       child: Container(
-        decoration: const BoxDecoration(
-          color: AppColorTokens.bgSecondary,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         padding: EdgeInsets.only(bottom: bottom),
@@ -224,7 +223,7 @@ class _TournamentSheetState extends ConsumerState<TournamentSheet>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColorTokens.border,
+                  color: Theme.of(context).colorScheme.outline,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -245,7 +244,7 @@ class _TournamentSheetState extends ConsumerState<TournamentSheet>
                     height: 22,
                     margin: const EdgeInsets.only(top: 2),
                     decoration: BoxDecoration(
-                      color: AppColorTokens.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -265,8 +264,10 @@ class _TournamentSheetState extends ConsumerState<TournamentSheet>
                         const SizedBox(height: 2),
                         Text(
                           _stepSubtitle,
-                          style: const TextStyle(
-                            color: AppColorTokens.textSecondary,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             fontSize: 12,
                           ),
                         ),
@@ -275,9 +276,9 @@ class _TournamentSheetState extends ConsumerState<TournamentSheet>
                   ),
                   IconButton(
                     padding: EdgeInsets.zero,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close,
-                      color: AppColorTokens.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
@@ -378,9 +379,13 @@ class _StepDot extends StatelessWidget {
           height: 28,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: active ? AppColorTokens.primary : AppColorTokens.surface,
+            color: active
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.surface,
             border: Border.all(
-              color: active ? AppColorTokens.primary : AppColorTokens.border,
+              color: active
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline,
               width: 1.5,
             ),
           ),
@@ -388,7 +393,11 @@ class _StepDot extends StatelessWidget {
             child: Text(
               '$index',
               style: TextStyle(
-                color: active ? Colors.black : AppColorTokens.textDisabled,
+                color: active
+                    ? Colors.black
+                    : Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withOpacity(0.5),
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
@@ -400,8 +409,10 @@ class _StepDot extends StatelessWidget {
           label,
           style: TextStyle(
             color: active
-                ? AppColorTokens.primary
-                : AppColorTokens.textDisabled,
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withOpacity(0.5),
             fontSize: 10,
             fontWeight: FontWeight.w600,
           ),
@@ -423,7 +434,9 @@ class _StepLine extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           height: 1.5,
-          color: active ? AppColorTokens.primary : AppColorTokens.border,
+          color: active
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.outline,
         ),
       ),
     );
@@ -464,10 +477,10 @@ class _TemplatePicker extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(AppSizes.space12),
               decoration: BoxDecoration(
-                color: AppColorTokens.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(AppSizes.radius16),
                 border: Border.all(
-                  color: AppColorTokens.primary.withAlpha(70),
+                  color: Theme.of(context).colorScheme.primary.withAlpha(70),
                   width: 1,
                 ),
               ),
@@ -477,17 +490,19 @@ class _TemplatePicker extends ConsumerWidget {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppColorTokens.primary.withAlpha(30),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withAlpha(30),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.add_rounded,
-                      color: AppColorTokens.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 22,
                     ),
                   ),
                   const SizedBox(width: AppSizes.space12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -502,16 +517,18 @@ class _TemplatePicker extends ConsumerWidget {
                         Text(
                           'Create a new tournament from scratch',
                           style: TextStyle(
-                            color: AppColorTokens.textSecondary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             fontSize: 12,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.arrow_forward_ios_rounded,
-                    color: AppColorTokens.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 14,
                   ),
                 ],
@@ -520,12 +537,12 @@ class _TemplatePicker extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: AppSizes.space16),
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSizes.space16),
           child: Text(
             'Or copy from a past tournament',
             style: TextStyle(
-              color: AppColorTokens.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 12,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.5,
@@ -535,11 +552,11 @@ class _TemplatePicker extends ConsumerWidget {
         const SizedBox(height: AppSizes.space8),
         Flexible(
           child: tournamentsAsync.when(
-            loading: () => const Padding(
+            loading: () => Padding(
               padding: EdgeInsets.all(AppSizes.space32),
               child: Center(
                 child: CircularProgressIndicator(
-                  color: AppColorTokens.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   strokeWidth: 2,
                 ),
               ),
@@ -573,7 +590,7 @@ class _TemplatePicker extends ConsumerWidget {
                   AppSizes.space24,
                 ),
                 itemCount: list.length,
-                separatorBuilder: (_, __) =>
+                separatorBuilder: (_, _) =>
                     const SizedBox(height: AppSizes.space8),
                 itemBuilder: (context, i) =>
                     _TemplateItem(tournament: list[i], onTap: onSelect),
@@ -600,9 +617,9 @@ class _TemplateItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSizes.space12),
         decoration: BoxDecoration(
-          color: AppColorTokens.surface,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          border: Border.all(color: AppColorTokens.border),
+          border: Border.all(color: Theme.of(context).colorScheme.outline),
         ),
         child: Row(
           children: [
@@ -616,10 +633,12 @@ class _TemplateItem extends StatelessWidget {
                 errorBuilder: (_, _, _) => Container(
                   width: 56,
                   height: 56,
-                  color: AppColorTokens.bgTertiary,
-                  child: const Icon(
+                  color: Theme.of(context).colorScheme.surface,
+                  child: Icon(
                     Icons.sports_esports,
-                    color: AppColorTokens.textDisabled,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withOpacity(0.5),
                     size: 22,
                   ),
                 ),
@@ -645,10 +664,13 @@ class _TemplateItem extends StatelessWidget {
                     children: [
                       _Tag(
                         t.gameMode.name.toUpperCase(),
-                        AppColorTokens.primary,
+                        Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 6),
-                      _Tag('₹${t.entryFee} Entry', AppColorTokens.secondary),
+                      _Tag(
+                        '₹${t.entryFee} Entry',
+                        Theme.of(context).colorScheme.secondary,
+                      ),
                       const SizedBox(width: 6),
                       _Tag('${t.maxSlots} slots', Colors.white30),
                     ],
@@ -660,14 +682,16 @@ class _TemplateItem extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColorTokens.primary.withAlpha(25),
+                color: Theme.of(context).colorScheme.primary.withAlpha(25),
                 borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                border: Border.all(color: AppColorTokens.primary.withAlpha(80)),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withAlpha(80),
+                ),
               ),
-              child: const Text(
+              child: Text(
                 'Use',
                 style: TextStyle(
-                  color: AppColorTokens.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -760,12 +784,14 @@ class _TournamentForm extends StatelessWidget {
               label: 'Tournament Title',
               hint: 'e.g. Firedrop Pro League S6',
               validator: (v) => v?.trim().isEmpty ?? true ? 'Required' : null,
+              context: context,
             ),
             _field(
               ctrl: descCtrl,
               label: 'Description',
               hint: 'Tell players what this is about...',
               maxLines: 3,
+              context: context,
             ),
             _field(
               ctrl: imageCtrl,
@@ -773,6 +799,7 @@ class _TournamentForm extends StatelessWidget {
               hint: 'https://...',
               keyboard: TextInputType.url,
               validator: (v) => v?.trim().isEmpty ?? true ? 'Required' : null,
+              context: context,
             ),
             const _FieldLabel('Game Mode'),
             const SizedBox(height: 8),
@@ -790,13 +817,13 @@ class _TournamentForm extends StatelessWidget {
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: sel
-                              ? AppColorTokens.primary
-                              : AppColorTokens.surface,
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: sel
-                                ? AppColorTokens.primary
-                                : AppColorTokens.border,
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.outline,
                           ),
                         ),
                         child: Text(
@@ -804,7 +831,9 @@ class _TournamentForm extends StatelessWidget {
                           style: TextStyle(
                             color: sel
                                 ? Colors.black
-                                : AppColorTokens.textSecondary,
+                                : Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
@@ -824,15 +853,17 @@ class _TournamentForm extends StatelessWidget {
                 height: 50,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: AppColorTokens.surface,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColorTokens.border),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.calendar_today_outlined,
-                      color: AppColorTokens.primary,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 18,
                     ),
                     const SizedBox(width: 8),
@@ -845,9 +876,9 @@ class _TournamentForm extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    const Icon(
+                    Icon(
                       Icons.arrow_drop_down,
-                      color: AppColorTokens.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ],
                 ),
@@ -863,6 +894,7 @@ class _TournamentForm extends StatelessWidget {
                     hint: '0',
                     keyboard: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    context: context,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -873,6 +905,7 @@ class _TournamentForm extends StatelessWidget {
                     hint: '100',
                     keyboard: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    context: context,
                   ),
                 ),
               ],
@@ -888,6 +921,7 @@ class _TournamentForm extends StatelessWidget {
                     hint: '0',
                     keyboard: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    context: context,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -898,6 +932,7 @@ class _TournamentForm extends StatelessWidget {
                     hint: '0',
                     keyboard: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    context: context,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -908,6 +943,7 @@ class _TournamentForm extends StatelessWidget {
                     hint: '0',
                     keyboard: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    context: context,
                   ),
                 ),
               ],
@@ -917,6 +953,7 @@ class _TournamentForm extends StatelessWidget {
               label: 'Rules & Guidelines',
               hint: 'Enter tournament rules...',
               maxLines: 4,
+              context: context,
             ),
             const SizedBox(height: 8),
             // ── Preview CTA ──
@@ -927,10 +964,10 @@ class _TournamentForm extends StatelessWidget {
                 onTap: onPreview,
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       colors: [
-                        AppColorTokens.primaryLight,
-                        AppColorTokens.primary,
+                        Theme.of(context).colorScheme.onPrimaryContainer,
+                        Theme.of(context).colorScheme.primary,
                       ],
                     ),
                     borderRadius: BorderRadius.circular(AppSizes.radiusFull),
@@ -969,6 +1006,7 @@ class _TournamentForm extends StatelessWidget {
     required TextEditingController ctrl,
     required String label,
     required String hint,
+    required context,
     int maxLines = 1,
     TextInputType keyboard = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
@@ -990,35 +1028,41 @@ class _TournamentForm extends StatelessWidget {
             style: const TextStyle(color: Colors.white, fontSize: 14),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: const TextStyle(
-                color: AppColorTokens.textDisabled,
+              hintStyle: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withOpacity(0.5),
                 fontSize: 13,
               ),
               filled: true,
-              fillColor: AppColorTokens.surface,
+              fillColor: Theme.of(context).colorScheme.surface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 14,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColorTokens.border),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: AppColorTokens.primary,
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
                   width: 1.5,
                 ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: AppColorTokens.error),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: AppColorTokens.error,
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.error,
                   width: 1.5,
                 ),
               ),
@@ -1109,14 +1153,16 @@ class _TournamentPreview extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColorTokens.primary.withAlpha(30),
+                  color: Theme.of(context).colorScheme.primary.withAlpha(30),
                   borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                  border: Border.all(color: AppColorTokens.primary),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 child: Text(
                   gameMode.name.toUpperCase(),
-                  style: const TextStyle(
-                    color: AppColorTokens.primary,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                   ),
@@ -1128,8 +1174,8 @@ class _TournamentPreview extends StatelessWidget {
           if (description.isNotEmpty)
             Text(
               description,
-              style: const TextStyle(
-                color: AppColorTokens.textSecondary,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 13,
                 height: 1.5,
               ),
@@ -1143,14 +1189,14 @@ class _TournamentPreview extends StatelessWidget {
                 icon: Icons.calendar_today_outlined,
                 label: 'Start Time',
                 value: DateFormat('d MMM • HH:mm').format(startTime),
-                color: AppColorTokens.primary,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: AppSizes.space8),
               _PreviewStat(
                 icon: Icons.group_outlined,
                 label: 'Max Slots',
                 value: '$maxSlots players',
-                color: AppColorTokens.secondary,
+                color: Theme.of(context).colorScheme.secondary,
               ),
             ],
           ),
@@ -1161,14 +1207,14 @@ class _TournamentPreview extends StatelessWidget {
                 icon: Icons.monetization_on_outlined,
                 label: 'Entry Fee',
                 value: entryFee == 0 ? 'Free' : '₹$entryFee',
-                color: AppColorTokens.gold,
+                color: Theme.of(context).colorScheme.primary,
               ),
               const SizedBox(width: AppSizes.space8),
               _PreviewStat(
                 icon: Icons.emoji_events_outlined,
                 label: 'Prize Pool',
                 value: '₹$totalPrize',
-                color: AppColorTokens.success,
+                color: Colors.green,
               ),
             ],
           ),
@@ -1180,9 +1226,9 @@ class _TournamentPreview extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AppSizes.space16),
             decoration: BoxDecoration(
-              color: AppColorTokens.surface,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(AppSizes.radius16),
-              border: Border.all(color: AppColorTokens.border),
+              border: Border.all(color: Theme.of(context).colorScheme.outline),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -1204,14 +1250,16 @@ class _TournamentPreview extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSizes.space16),
               decoration: BoxDecoration(
-                color: AppColorTokens.surface,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(AppSizes.radius16),
-                border: Border.all(color: AppColorTokens.border),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ),
               child: Text(
                 rulesText,
-                style: const TextStyle(
-                  color: AppColorTokens.textSecondary,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 13,
                   height: 1.6,
                 ),
@@ -1230,23 +1278,27 @@ class _TournamentPreview extends StatelessWidget {
                   child: Container(
                     height: 52,
                     decoration: BoxDecoration(
-                      color: AppColorTokens.surface,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                      border: Border.all(color: AppColorTokens.border),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.edit_outlined,
-                          color: AppColorTokens.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           size: 16,
                         ),
                         SizedBox(width: 6),
                         Text(
                           'EDIT',
                           style: TextStyle(
-                            color: AppColorTokens.textSecondary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.w800,
                             fontSize: 13,
                             letterSpacing: 1,
@@ -1268,13 +1320,17 @@ class _TournamentPreview extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: submitting
                           ? null
-                          : const LinearGradient(
+                          : LinearGradient(
                               colors: [
-                                AppColorTokens.primaryLight,
-                                AppColorTokens.primary,
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                                Theme.of(context).colorScheme.primary,
                               ],
                             ),
-                      color: submitting ? AppColorTokens.border : null,
+                      color: submitting
+                          ? Theme.of(context).colorScheme.outline
+                          : null,
                       borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                     ),
                     child: Center(
@@ -1324,11 +1380,13 @@ class _NoImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: AppColorTokens.bgTertiary,
-      child: const Center(
+      color: Theme.of(context).colorScheme.surface,
+      child: Center(
         child: Icon(
           Icons.image_not_supported_outlined,
-          color: AppColorTokens.textDisabled,
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withOpacity(0.5),
           size: 36,
         ),
       ),
@@ -1386,8 +1444,8 @@ class _PreviewStat extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
-                      color: AppColorTokens.textSecondary,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1425,8 +1483,8 @@ class _PrizeTile extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           amount == 0 ? '-' : '₹$amount',
-          style: const TextStyle(
-            color: AppColorTokens.gold,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
             fontSize: 15,
             fontWeight: FontWeight.w800,
           ),
@@ -1439,7 +1497,11 @@ class _PrizeTile extends StatelessWidget {
 class _PrizeDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(height: 36, width: 1, color: AppColorTokens.border);
+    return Container(
+      height: 36,
+      width: 1,
+      color: Theme.of(context).colorScheme.outline,
+    );
   }
 }
 
@@ -1451,8 +1513,8 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
-        color: AppColorTokens.textSecondary,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
         fontSize: 12,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.5,

@@ -1,9 +1,9 @@
 import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/core/theme/app_colors.dart';
+// import 'package:firedrop/core/theme/app_colors.dart';
 import 'package:firedrop/core/theme/app_sizes.dart';
 import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
-import 'package:firedrop/features/organizer/tournaments/presentation/widgets/filter_chips.dart';
-import 'package:firedrop/features/organizer/tournaments/presentation/widgets/tournament_manage_card.dart';
+import 'package:firedrop/features/tournament/presentation/widgets/filter_chips.dart';
+import 'package:firedrop/features/tournament/presentation/widgets/tournament_manage_card.dart';
 import 'package:firedrop/features/tournament/presentation/providers/tournament_providers.dart';
 import 'package:firedrop/shared/models/tournaments_model.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class OrganizerTournamentsScreen extends ConsumerStatefulWidget {
 
 class _OrganizerTournamentsScreenState
     extends ConsumerState<OrganizerTournamentsScreen> {
-  TournamentStatus? _filterStatus;
+  TournamentStatus? _filterStatus = TournamentStatus.live;
 
   Future<void> _changeStatus(
     TournamentModel t,
@@ -50,8 +50,8 @@ class _OrganizerTournamentsScreenState
       SnackBar(
         content: Text(msg),
         backgroundColor: isError
-            ? AppColorTokens.error
-            : AppColorTokens.success,
+            ? Theme.of(context).colorScheme.error
+            : Colors.green,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius8),
@@ -222,16 +222,16 @@ class _ErrorView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.wifi_off_rounded,
-            color: AppColorTokens.error,
+            color: Theme.of(context).colorScheme.error,
             size: 40,
           ),
           const SizedBox(height: AppSizes.space16),
           Text(
             message,
-            style: const TextStyle(
-              color: AppColorTokens.textSecondary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 12,
             ),
           ),

@@ -14,20 +14,26 @@ class PlayerLeaderboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lbAsync = ref.watch(publishedLeaderboardProvider(tournament.id));
+    final gradients = Theme.of(context).extension<AppGradients>();
 
     return Scaffold(
-      backgroundColor: AppColorTokens.bgPrimary,
-      body: lbAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColorTokens.primary),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: Container(
+        decoration: BoxDecoration(gradient: gradients?.background),
+        child: lbAsync.when(
+          loading: () => Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          error: (e, _) => _ErrorView(message: e.toString()),
+          data: (lb) {
+            if (lb == null || !lb.isPublished) {
+              return _NotPublishedView(tournamentTitle: tournament.title);
+            }
+            return _LeaderboardView(tournament: tournament, lb: lb);
+          },
         ),
-        error: (e, _) => _ErrorView(message: e.toString()),
-        data: (lb) {
-          if (lb == null || !lb.isPublished) {
-            return _NotPublishedView(tournamentTitle: tournament.title);
-          }
-          return _LeaderboardView(tournament: tournament, lb: lb);
-        },
       ),
     );
   }
@@ -50,7 +56,7 @@ class _LeaderboardView extends StatelessWidget {
 
         // ── Timestamp chip ───────────────────────────────────────────────────
         if (lb.updatedAt != null)
-          SliverToBoxAdapter(child: _buildUpdatedChip(lb.updatedAt!)),
+          SliverToBoxAdapter(child: _buildUpdatedChip(context, lb.updatedAt!)),
 
         // ── Podium (top 3) ───────────────────────────────────────────────────
         if (lb.standings.length >= 3)
@@ -63,28 +69,36 @@ class _LeaderboardView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSizes.space16,
-              AppSizes.space24,
+              AppSizes.space32,
               AppSizes.space16,
-              0,
+              AppSizes.space8,
             ),
             child: Row(
               children: [
                 Container(
-                  width: 3,
-                  height: 18,
+                  width: 4,
+                  height: 20,
                   decoration: BoxDecoration(
-                    color: AppColorTokens.primary,
-                    borderRadius: BorderRadius.circular(2),
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha(100),
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                const Text(
+                const SizedBox(width: AppSizes.space12),
+                Text(
                   'FULL STANDINGS',
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
                   ),
                 ),
               ],
@@ -92,19 +106,17 @@ class _LeaderboardView extends StatelessWidget {
           ),
         ),
 
-        SliverToBoxAdapter(child: _buildTableHeader()),
+        SliverToBoxAdapter(child: _buildTableHeader(context)),
 
         SliverList(
           delegate: SliverChildBuilderDelegate(
-            (context, i) => _StandingRow(
-              standing: lb.standings[i],
-              isEven: i.isEven,
-            ),
+            (context, i) =>
+                _StandingRow(standing: lb.standings[i], isEven: i.isEven),
             childCount: lb.standings.length,
           ),
         ),
 
-        const SliverPadding(padding: EdgeInsets.only(bottom: 40)),
+        const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
       ],
     );
   }
@@ -113,14 +125,23 @@ class _LeaderboardView extends StatelessWidget {
 
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 200,
+      expandedHeight: 250,
       pinned: true,
-      backgroundColor: AppColorTokens.bgSecondary,
-      leading: IconButton(
-        onPressed: () => Navigator.pop(context),
-        icon: const Icon(
-          Icons.arrow_back_ios_rounded,
-          color: AppColorTokens.primary,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      leading: Container(
+        margin: const EdgeInsets.all(AppSizes.space8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface.withAlpha(150),
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Theme.of(context).colorScheme.onSurface,
+            size: 20,
+          ),
         ),
       ),
       flexibleSpace: FlexibleSpaceBar(
@@ -132,59 +153,45 @@ class _LeaderboardView extends StatelessWidget {
               tournament.imageUrl,
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => Container(
-                color: AppColorTokens.bgTertiary,
-                child: const Icon(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Icon(
                   Icons.image_not_supported_outlined,
-                  color: AppColorTokens.textDisabled,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withAlpha(100),
                   size: 48,
                 ),
               ),
             ),
-            // Dark gradient
+            // Gradient overlay using theme gradients
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0x55000000), Color(0xEE121212)],
-                  stops: [0.2, 1.0],
+                  colors: [
+                    Theme.of(context).colorScheme.surface.withAlpha(50),
+                    Theme.of(context).colorScheme.surface,
+                  ],
+                  stops: const [0.3, 1.0],
                 ),
               ),
             ),
             // Title + trophy
             Positioned(
-              bottom: 16,
-              left: AppSizes.space16,
-              right: AppSizes.space16,
+              bottom: AppSizes.space24,
+              left: AppSizes.space24,
+              right: AppSizes.space24,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.emoji_events_rounded,
-                        color: AppColorTokens.gold,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      const Text(
-                        'FINAL RESULTS',
-                        style: TextStyle(
-                          color: AppColorTokens.gold,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
                   Text(
                     tournament.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      height: 1.1,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -200,116 +207,110 @@ class _LeaderboardView extends StatelessWidget {
 
   // ── Updated chip ──────────────────────────────────────────────────────────
 
-  Widget _buildUpdatedChip(DateTime updatedAt) {
+  Widget _buildUpdatedChip(BuildContext context, DateTime updatedAt) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
+        AppSizes.space24,
         AppSizes.space16,
-        AppSizes.space16,
-        AppSizes.space16,
+        AppSizes.space24,
         0,
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppColorTokens.success.withAlpha(20),
-              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-              border: Border.all(
-                color: AppColorTokens.success.withAlpha(100),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.verified_rounded,
-                  color: AppColorTokens.success,
-                  size: 13,
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  'Published · ${DateFormat('d MMM yyyy, HH:mm').format(updatedAt)}',
-                  style: const TextStyle(
-                    color: AppColorTokens.success,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.space16,
+            vertical: AppSizes.space8,
           ),
-        ],
+          decoration: BoxDecoration(
+            color: AppColorTokens.success.withAlpha(20),
+            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+            border: Border.all(color: AppColorTokens.success.withAlpha(80)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColorTokens.success.withAlpha(20),
+                blurRadius: 10,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.verified_rounded,
+                color: AppColorTokens.success,
+                size: 14,
+              ),
+              const SizedBox(width: AppSizes.space8),
+              Text(
+                'Published · ${DateFormat('d MMM yyyy, HH:mm').format(updatedAt)}',
+                style: TextStyle(
+                  color: AppColorTokens.success,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   // ── Table header ──────────────────────────────────────────────────────────
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader(BuildContext context) {
+    final style = TextStyle(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      fontSize: 11,
+      fontWeight: FontWeight.w800,
+      letterSpacing: 1.5,
+    );
+
     return Container(
       margin: const EdgeInsets.fromLTRB(
         AppSizes.space16,
-        AppSizes.space12,
+        AppSizes.space16,
         AppSizes.space16,
         0,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.space16,
+        vertical: AppSizes.space12,
+      ),
       decoration: BoxDecoration(
-        color: AppColorTokens.bgTertiary,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppSizes.radius16),
         ),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withAlpha(50),
+        ),
       ),
-      child: const Row(
+      child: Row(
         children: [
           SizedBox(
             width: 48,
-            child: Text(
-              'RANK',
-              style: _headerStyle,
-              textAlign: TextAlign.center,
-            ),
+            child: Text('RANK', style: style, textAlign: TextAlign.center),
           ),
-          Expanded(
-            child: Text('TEAM', style: _headerStyle),
+          const SizedBox(width: AppSizes.space8),
+          Expanded(child: Text('TEAM', style: style)),
+          SizedBox(
+            width: 56,
+            child: Text('POS', style: style, textAlign: TextAlign.center),
           ),
           SizedBox(
             width: 56,
-            child: Text(
-              'POS',
-              style: _headerStyle,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          SizedBox(
-            width: 56,
-            child: Text(
-              'KILLS',
-              style: _headerStyle,
-              textAlign: TextAlign.center,
-            ),
+            child: Text('KILLS', style: style, textAlign: TextAlign.center),
           ),
           SizedBox(
             width: 64,
-            child: Text(
-              'PTS',
-              style: _headerStyle,
-              textAlign: TextAlign.center,
-            ),
+            child: Text('PTS', style: style, textAlign: TextAlign.center),
           ),
         ],
       ),
     );
   }
 }
-
-const _headerStyle = TextStyle(
-  color: AppColorTokens.primary,
-  fontSize: 10,
-  fontWeight: FontWeight.w700,
-  letterSpacing: 1.2,
-);
 
 // ─── Podium Widget ────────────────────────────────────────────────────────────
 
@@ -325,40 +326,20 @@ class _Podium extends StatelessWidget {
     final second = standings.length > 1 ? standings[1] : null;
     final third = standings.length > 2 ? standings[2] : null;
 
+    final gradients = Theme.of(context).extension<AppGradients>()!;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSizes.space16,
-        AppSizes.space24,
+        AppSizes.space32,
         AppSizes.space16,
         0,
       ),
       child: Column(
         children: [
-          // Glow divider
-          Container(
-            height: 1,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  AppColorTokens.gold,
-                  AppColorTokens.primary,
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSizes.space24),
-          const Text(
-            '🏆  TOP 3  🏆',
-            style: TextStyle(
-              color: AppColorTokens.gold,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 3,
-            ),
-          ),
-          const SizedBox(height: AppSizes.space24),
+          // Premium dividers
+          _buildPodiumHeader(context, gradients),
+          const SizedBox(height: AppSizes.space40),
           // Podium layout: 2nd | 1st | 3rd
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -367,39 +348,40 @@ class _Podium extends StatelessWidget {
                 child: _PodiumPillar(
                   standing: second,
                   place: 2,
-                  accentColor: const Color(0xFFC0C0C0),
-                  height: 90,
+                  accentColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 100,
                 ),
               ),
-              const SizedBox(width: AppSizes.space8),
+              const SizedBox(width: AppSizes.space12),
               Expanded(
+                flex: 1,
                 child: _PodiumPillar(
                   standing: first,
                   place: 1,
-                  accentColor: AppColorTokens.gold,
-                  height: 120,
+                  accentColor: Theme.of(context).colorScheme.primary,
+                  height: 140,
                   isWinner: true,
                 ),
               ),
-              const SizedBox(width: AppSizes.space8),
+              const SizedBox(width: AppSizes.space12),
               Expanded(
                 child: _PodiumPillar(
                   standing: third,
                   place: 3,
-                  accentColor: const Color(0xFFCD7F32),
-                  height: 70,
+                  accentColor: Theme.of(context).colorScheme.secondary,
+                  height: 80,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSizes.space16),
+          const SizedBox(height: AppSizes.space24),
           Container(
             height: 1,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
                   Colors.transparent,
-                  AppColorTokens.border,
+                  Theme.of(context).colorScheme.outlineVariant.withAlpha(100),
                   Colors.transparent,
                 ],
               ),
@@ -407,6 +389,72 @@ class _Podium extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPodiumHeader(BuildContext context, AppGradients gradients) {
+    return Column(
+      children: [
+        Container(
+          height: 1,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.transparent,
+                Theme.of(context).colorScheme.primary.withAlpha(150),
+                Theme.of(context).colorScheme.secondary.withAlpha(150),
+                Colors.transparent,
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSizes.space24),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.space24,
+            vertical: AppSizes.space8,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary.withAlpha(50),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.primary.withAlpha(20),
+                blurRadius: 16,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.star_rounded,
+                color: Theme.of(context).colorScheme.primary,
+                size: 16,
+              ),
+              const SizedBox(width: AppSizes.space12),
+              Text(
+                'TOP 3',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 4,
+                ),
+              ),
+              const SizedBox(width: AppSizes.space12),
+              Icon(
+                Icons.star_rounded,
+                color: Theme.of(context).colorScheme.secondary,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -441,65 +489,86 @@ class _PodiumPillar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (standing == null) return const SizedBox.shrink();
 
+    final gradients = Theme.of(context).extension<AppGradients>();
+
     return Column(
       children: [
         // Winner crown animation for 1st place
         if (isWinner) ...[
-          TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.8, end: 1.05),
-            duration: const Duration(seconds: 1),
-            curve: Curves.easeInOut,
-            builder: (context, scale, child) =>
-                Transform.scale(scale: scale, child: child),
-            child: const Text('👑', style: TextStyle(fontSize: 28)),
-          ),
-          const SizedBox(height: 8),
+          const Text('👑', style: TextStyle(fontSize: 32)),
+          const SizedBox(height: AppSizes.space8),
         ],
         // Team name
         Text(
           standing!.teamName,
           style: TextStyle(
-            color: isWinner ? Colors.white : AppColorTokens.textSecondary,
-            fontSize: isWinner ? 13 : 12,
-            fontWeight: isWinner ? FontWeight.w800 : FontWeight.w600,
+            color: isWinner
+                ? Theme.of(context).colorScheme.onSurface
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: isWinner ? 14 : 12,
+            fontWeight: isWinner ? FontWeight.w900 : FontWeight.w700,
           ),
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSizes.space8),
         // Points badge
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSizes.space12,
+            vertical: 4.0,
+          ),
           decoration: BoxDecoration(
-            color: accentColor.withAlpha(25),
+            color: accentColor.withAlpha(20),
             borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-            border: Border.all(color: accentColor.withAlpha(100)),
+            border: Border.all(color: accentColor.withAlpha(80)),
+            boxShadow: isWinner
+                ? [BoxShadow(color: accentColor.withAlpha(40), blurRadius: 8)]
+                : [],
           ),
           child: Text(
             '${standing!.totalPoints} pts',
             style: TextStyle(
               color: accentColor,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),
-        const SizedBox(height: AppSizes.space8),
+        const SizedBox(height: AppSizes.space12),
         // Pillar
         Container(
           height: height,
           decoration: BoxDecoration(
-            color: accentColor.withAlpha(20),
+            gradient: isWinner
+                ? (gradients?.primary ??
+                      LinearGradient(
+                        colors: [accentColor, accentColor.withAlpha(150)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ))
+                : LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                      Theme.of(context).colorScheme.surface,
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppSizes.radius8),
+              top: Radius.circular(12.0),
             ),
-            border: Border.all(color: accentColor.withAlpha(80)),
+            border: Border(
+              top: BorderSide(color: accentColor, width: isWinner ? 3 : 2),
+              left: BorderSide(color: accentColor.withAlpha(100), width: 1),
+              right: BorderSide(color: accentColor.withAlpha(100), width: 1),
+            ),
             boxShadow: isWinner
                 ? [
                     BoxShadow(
-                      color: accentColor.withAlpha(60),
-                      blurRadius: 20,
+                      color: accentColor.withAlpha(100),
+                      blurRadius: 24,
                       offset: const Offset(0, -4),
                     ),
                   ]
@@ -508,7 +577,7 @@ class _PodiumPillar extends StatelessWidget {
           child: Center(
             child: Text(
               _placeEmoji,
-              style: TextStyle(fontSize: isWinner ? 32 : 24),
+              style: TextStyle(fontSize: isWinner ? 36 : 28),
             ),
           ),
         ),
@@ -525,11 +594,11 @@ class _StandingRow extends StatelessWidget {
 
   const _StandingRow({required this.standing, required this.isEven});
 
-  Color _rankColor(int rank) {
-    if (rank == 1) return AppColorTokens.gold;
-    if (rank == 2) return const Color(0xFFC0C0C0);
-    if (rank == 3) return const Color(0xFFCD7F32);
-    return AppColorTokens.textSecondary;
+  Color _rankColor(BuildContext context, int rank) {
+    if (rank == 1) return Theme.of(context).colorScheme.primary;
+    if (rank == 2) return Theme.of(context).colorScheme.onSurfaceVariant;
+    if (rank == 3) return Theme.of(context).colorScheme.secondary;
+    return Theme.of(context).colorScheme.primary;
   }
 
   String _rankLabel(int rank) {
@@ -543,8 +612,12 @@ class _StandingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final isTop3 = standing.rank <= 3;
     final rowColor = isTop3
-        ? _rankColor(standing.rank).withAlpha(12)
-        : (isEven ? AppColorTokens.bgPrimary : AppColorTokens.bgSecondary);
+        ? _rankColor(context, standing.rank).withAlpha(15)
+        : (isEven
+              ? Theme.of(context).colorScheme.surface
+              : Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withAlpha(50));
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSizes.space16),
@@ -552,16 +625,26 @@ class _StandingRow extends StatelessWidget {
         color: rowColor,
         border: Border(
           left: isTop3
-              ? BorderSide(
-                  color: _rankColor(standing.rank).withAlpha(160),
-                  width: 3,
-                )
-              : BorderSide.none,
-          bottom: const BorderSide(color: AppColorTokens.border, width: 0.5),
+              ? BorderSide(color: _rankColor(context, standing.rank), width: 3)
+              : BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                  width: 1,
+                ),
+          right: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withAlpha(50),
+            width: 1,
+          ),
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withAlpha(50),
+            width: 1,
+          ),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.space16,
+          vertical: AppSizes.space16,
+        ),
         child: Row(
           children: [
             // Rank
@@ -571,14 +654,16 @@ class _StandingRow extends StatelessWidget {
                 child: Text(
                   _rankLabel(standing.rank),
                   style: TextStyle(
-                    color: _rankColor(standing.rank),
-                    fontSize: isTop3 ? 16 : 13,
-                    fontWeight: FontWeight.w800,
+                    color: isTop3
+                        ? _rankColor(context, standing.rank)
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: isTop3 ? 18 : 14,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
               ),
             ),
-
+            const SizedBox(width: AppSizes.space8),
             // Team info
             Expanded(
               child: Column(
@@ -587,19 +672,23 @@ class _StandingRow extends StatelessWidget {
                   Text(
                     standing.teamName,
                     style: TextStyle(
-                      color: isTop3 ? Colors.white : AppColorTokens.textPrimary,
-                      fontSize: 13,
-                      fontWeight:
-                          isTop3 ? FontWeight.w700 : FontWeight.w500,
+                      color: isTop3
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withAlpha(200),
+                      fontSize: 14,
+                      fontWeight: isTop3 ? FontWeight.w800 : FontWeight.w600,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     'Finished #${standing.position > 0 ? standing.position : "—"}',
-                    style: const TextStyle(
-                      color: AppColorTokens.textSecondary,
-                      fontSize: 11,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 12,
                     ),
                   ),
                 ],
@@ -612,10 +701,10 @@ class _StandingRow extends StatelessWidget {
               child: Center(
                 child: Text(
                   standing.position > 0 ? '#${standing.position}' : '—',
-                  style: const TextStyle(
-                    color: AppColorTokens.textSecondary,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -625,24 +714,34 @@ class _StandingRow extends StatelessWidget {
             SizedBox(
               width: 56,
               child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.gps_fixed_rounded,
-                      color: AppColorTokens.error,
-                      size: 11,
-                    ),
-                    const SizedBox(width: 3),
-                    Text(
-                      '${standing.kills}',
-                      style: const TextStyle(
-                        color: AppColorTokens.textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.error.withAlpha(15),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.gps_fixed_rounded,
+                        color: Theme.of(context).colorScheme.error,
+                        size: 11,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      Text(
+                        '${standing.kills}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -653,23 +752,26 @@ class _StandingRow extends StatelessWidget {
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
+                    horizontal: 10,
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColorTokens.primary.withAlpha(isTop3 ? 30 : 20),
-                    borderRadius:
-                        BorderRadius.circular(AppSizes.radiusFull),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withAlpha(isTop3 ? 25 : 15),
+                    borderRadius: BorderRadius.circular(AppSizes.radius8),
                     border: Border.all(
-                      color: AppColorTokens.primary.withAlpha(isTop3 ? 120 : 60),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withAlpha(isTop3 ? 80 : 30),
                     ),
                   ),
                   child: Text(
                     '${standing.totalPoints}',
-                    style: const TextStyle(
-                      color: AppColorTokens.primary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -696,39 +798,57 @@ class _NotPublishedView extends StatelessWidget {
           // Back button
           Align(
             alignment: Alignment.topLeft,
-            child: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(
-                Icons.arrow_back_ios_rounded,
-                color: AppColorTokens.primary,
+            child: Padding(
+              padding: const EdgeInsets.all(AppSizes.space8),
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
           ),
           const Spacer(),
-          const Icon(
-            Icons.hourglass_top_rounded,
-            color: AppColorTokens.textDisabled,
-            size: 64,
-          ),
-          const SizedBox(height: AppSizes.space16),
-          const Text(
-            'Results Pending',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
+          Container(
+            padding: const EdgeInsets.all(AppSizes.space24),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).colorScheme.primary.withAlpha(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).colorScheme.primary.withAlpha(20),
+                  blurRadius: 40,
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.hourglass_top_rounded,
+              color: Theme.of(context).colorScheme.primary,
+              size: 64,
             ),
           ),
-          const SizedBox(height: AppSizes.space8),
+          const SizedBox(height: AppSizes.space32),
+          Text(
+            'RESULTS PENDING',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 2,
+            ),
+          ),
+          const SizedBox(height: AppSizes.space16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSizes.space40),
             child: Text(
               'The organizer hasn\'t published the leaderboard for "$tournamentTitle" yet. Check back soon!',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColorTokens.textSecondary,
-                fontSize: 14,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 15,
                 height: 1.6,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -750,10 +870,33 @@ class _ErrorView extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.space32),
-        child: Text(
-          'Error loading leaderboard:\n$message',
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: AppColorTokens.error, fontSize: 14),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              color: Theme.of(context).colorScheme.error,
+              size: 48,
+            ),
+            const SizedBox(height: AppSizes.space16),
+            Text(
+              'Error loading leaderboard',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSizes.space8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error.withAlpha(200),
+                fontSize: 14,
+              ),
+            ),
+          ],
         ),
       ),
     );

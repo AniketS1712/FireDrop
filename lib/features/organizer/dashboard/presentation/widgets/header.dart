@@ -30,18 +30,15 @@ class DashboardHeader extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Avatar
-          InkWell(
-            onTap: () => context.pushNamed(RouteNames.profile),
-            child: Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: colorsScheme.primary, width: 2),
-              ),
-              child: Center(
-                child: Text(initials, style: textScheme.headlineMedium),
-              ),
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: colorsScheme.primary, width: 2),
+            ),
+            child: Center(
+              child: Text(initials, style: textScheme.headlineMedium),
             ),
           ),
           const SizedBox(width: AppSizes.space12),

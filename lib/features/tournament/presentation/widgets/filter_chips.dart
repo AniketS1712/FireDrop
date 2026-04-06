@@ -13,7 +13,6 @@ class FilterChips extends StatelessWidget {
   });
 
   static const _filters = <String, TournamentStatus?>{
-    'All': null,
     'Live': TournamentStatus.live,
     'Upcoming': TournamentStatus.upcoming,
     'Completed': TournamentStatus.completed,
@@ -26,12 +25,7 @@ class FilterChips extends StatelessWidget {
     final textScheme = theme.textTheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        0,
-        AppSizes.space16,
-        0,
-        AppSizes.space16,
-      ),
+      padding: const EdgeInsets.only(bottom: AppSizes.space16),
       child: Padding(
         padding: const EdgeInsets.all(AppSizes.space16),
         child: Row(
@@ -43,7 +37,7 @@ class FilterChips extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.space16,
+                  horizontal: AppSizes.space24,
                   vertical: AppSizes.space8,
                 ),
                 decoration: BoxDecoration(

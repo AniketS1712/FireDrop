@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firedrop/shared/models/leaderboard_template.dart';
 
 /// A single standing row from the published leaderboard.
 class PublishedStanding {
@@ -40,12 +41,14 @@ class PublishedLeaderboard {
   final bool isPublished;
   final List<PublishedStanding> standings;
   final DateTime? updatedAt;
+  final LeaderboardTemplate template;
 
   const PublishedLeaderboard({
     required this.tournamentId,
     required this.isPublished,
     required this.standings,
     this.updatedAt,
+    this.template = LeaderboardTemplate.classic,
   });
 
   factory PublishedLeaderboard.fromMap(
@@ -62,11 +65,18 @@ class PublishedLeaderboard {
     final raw = map['updatedAt'];
     if (raw is Timestamp) updatedAt = raw.toDate();
 
+    final templateStr = map['template'] as String? ?? 'classic';
+    final template = LeaderboardTemplate.values.firstWhere(
+      (e) => e.name == templateStr,
+      orElse: () => LeaderboardTemplate.classic,
+    );
+
     return PublishedLeaderboard(
       tournamentId: tournamentId,
       isPublished: map['isPublished'] ?? false,
       standings: standings,
       updatedAt: updatedAt,
+      template: template,
     );
   }
 }
