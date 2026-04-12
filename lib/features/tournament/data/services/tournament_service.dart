@@ -1,6 +1,6 @@
-import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
-import 'package:firedrop/features/tournament/data/repositories/tournament_repository.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/features/tournament/data/repositories/tournament_repository.dart';
 import 'package:uuid/uuid.dart';
 
 class TournamentService {

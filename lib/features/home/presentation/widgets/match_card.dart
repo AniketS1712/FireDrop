@@ -1,15 +1,23 @@
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
-import 'package:firedrop/features/team/presentation/providers/team_providers.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/features/team/presentation/providers/team_providers.dart';
 import 'package:flutter/material.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
 
 class MatchCard extends ConsumerWidget {
   final TournamentModel tournament;
+  final VoidCallback? onTap;
+  final Widget? actionButton;
+  final bool isMatchScreen;
 
-  final VoidCallback? onJoin;
-
-  const MatchCard({super.key, required this.tournament, this.onJoin});
+  const MatchCard({
+    super.key,
+    required this.tournament,
+    this.onTap,
+    this.actionButton,
+    this.isMatchScreen = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,101 +25,194 @@ class MatchCard extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     final isLive = tournament.isLive;
+    final now = DateTime.now();
 
-    final timeDiff = tournament.startTime.difference(DateTime.now());
-    final String timeLabel;
-    if (isLive) {
-      timeLabel = 'Live Now';
-    } else if (timeDiff.inMinutes > 0) {
-      final hours = timeDiff.inHours;
-      final minutes = timeDiff.inMinutes % 60;
-      if (hours > 0) {
-        timeLabel = 'Starts in ${hours}h ${minutes}m';
-      } else {
-        timeLabel = 'Starts in ${minutes}m';
-      }
+    // ── Time Formatting Logic ───────────────────────────────────────────────
+    final startDateStr = DateFormat(
+      'MMM dd, hh:mm a',
+    ).format(tournament.startTime);
+
+    final regDiff = tournament.startTime.difference(now);
+    final String regLabel;
+
+    if (regDiff.isNegative) {
+      regLabel = 'CLOSED';
     } else {
-      timeLabel = 'Starting soon';
+      final days = regDiff.inDays;
+      final hours = regDiff.inHours % 24;
+      final minutes = regDiff.inMinutes % 60;
+
+      if (days > 0) {
+        regLabel = '${days}d ${hours}h left';
+      } else if (hours > 0) {
+        regLabel = '${hours}h ${minutes}m left';
+      } else {
+        regLabel = '${minutes}m left';
+      }
     }
 
     return GestureDetector(
-      onTap: onJoin,
+      onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: AppSizes.space8),
+        margin: const EdgeInsets.only(bottom: AppSizes.space24),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.primary, width: 1.5),
-          borderRadius: BorderRadius.circular(AppSizes.radius16),
+          color: colorScheme.surfaceContainerHighest.withAlpha(50),
+          borderRadius: BorderRadius.circular(AppSizes.radius24),
+          border: Border.all(
+            color: colorScheme.outline.withAlpha(80),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withAlpha(40),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSizes.space8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Tournament Image ──────────────────────────────────────────
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSizes.radius8),
-                    child: Image.network(
-                      tournament.imageUrl,
-                      width: double.infinity,
-                      height: 170,
-                      fit: BoxFit.cover,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Top Section (Image) ───────────────────────────────
+            Stack(
+              children: [
+                ShaderMask(
+                  shaderCallback: (rect) {
+                    return LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.black, Colors.transparent],
+                    ).createShader(
+                      Rect.fromLTRB(0, 0, rect.width, rect.height + 200),
+                    );
+                  },
+                  blendMode: BlendMode.dstIn,
+                  child: Image.network(
+                    tournament.imageUrl,
+                    height: 160,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 160,
+                      color: colorScheme.surfaceContainerHighest,
+                      child: Icon(
+                        Icons.sports_esports,
+                        size: 40,
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ),
+                ),
 
-                  // Live badge overlaid on the image
-                  if (isLive)
-                    Positioned(
-                      top: AppSizes.space8,
-                      left: AppSizes.space8,
-                      child: _LiveBadge(colorScheme: colorScheme),
+                // Entry Fee Overlay
+                if (!isMatchScreen)
+                  Positioned(
+                    bottom: 12,
+                    right: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primary,
+                        borderRadius: BorderRadius.circular(AppSizes.radius16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.primary.withAlpha(100),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        '₹${tournament.entryFee}',
+                        style: textTheme.labelLarge?.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
                     ),
-                ],
-              ),
+                  ),
+              ],
+            ),
 
-              const SizedBox(height: AppSizes.space16),
-
-              // ── Title + Entry Fee ─────────────────────────────────────────
-              Row(
+            // ── Information Section ───────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.all(AppSizes.space16),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(tournament.title, style: textTheme.titleMedium),
-                  ),
                   Text(
-                    '\$${tournament.entryFee}',
-                    style: textTheme.titleMedium?.copyWith(
-                      color: colorScheme.primary,
+                    tournament.title.toUpperCase(),
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.8,
+                      height: 1.2,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
+                  const SizedBox(height: AppSizes.space12),
 
-              const SizedBox(height: AppSizes.space8),
-
-              // ── Time label ────────────────────────────────────────────────
-              Text(
-                timeLabel,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: isLive ? colorScheme.primary : colorScheme.secondary,
-                  fontWeight: isLive ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-
-              const SizedBox(height: AppSizes.space16),
-
-              // ── Registrations + Button ────────────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total Registrations: ${tournament.maxSlots}',
-                    style: textTheme.bodyMedium,
+                  // Match Metadata Row
+                  Row(
+                    children: [
+                      _StatItem(
+                        icon: Icons.sports_esports_outlined,
+                        text: tournament.gameMode.name.toUpperCase(),
+                        colorScheme: colorScheme,
+                      ),
+                      const SizedBox(width: 16),
+                      _StatItem(
+                        icon: Icons.people_outline_rounded,
+                        text: '${tournament.maxSlots} SLOTS',
+                        colorScheme: colorScheme,
+                      ),
+                    ],
                   ),
 
-                  // Only allow registration for non-live tournaments
-                  if (!isLive)
+                  if (!isMatchScreen) ...[
+                    const SizedBox(height: AppSizes.space16),
+                    const Divider(height: 2),
+                    const SizedBox(height: AppSizes.space16),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _TimeInfo(
+                            label: 'START AT',
+                            value: startDateStr,
+                            icon: Icons.calendar_month_outlined,
+                            colorScheme: colorScheme,
+                          ),
+                        ),
+                        Container(
+                          height: 30,
+                          width: 2,
+                          color: colorScheme.outline,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: _TimeInfo(
+                            label: 'REGISTRATION ENDS IN',
+                            value: regLabel,
+                            icon: Icons.timer_outlined,
+                            colorScheme: colorScheme,
+                            highlight: !isLive && !regDiff.isNegative,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  const SizedBox(height: AppSizes.space24),
+
+                  // Call to Action
+                  if (actionButton != null)
+                    actionButton!
+                  else if (!isLive)
                     Consumer(
                       builder: (context, ref, _) {
                         final teamAsync = ref.watch(
@@ -119,144 +220,159 @@ class MatchCard extends ConsumerWidget {
                         );
                         final isRegistered = teamAsync.value != null;
 
-                        return ElevatedButton(
-                          onPressed: onJoin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isRegistered
-                                ? colorScheme.surfaceContainerHighest
-                                : colorScheme.primaryContainer,
-                            foregroundColor: isRegistered
-                                ? colorScheme.onSurfaceVariant
-                                : colorScheme.onPrimary,
-                            shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                color: isRegistered
-                                    ? colorScheme.outline
-                                    : colorScheme.outline,
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(
-                                AppSizes.radius16,
+                        return SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: onTap,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isRegistered
+                                  ? colorScheme.surfaceContainerHighest
+                                        .withAlpha(200)
+                                  : colorScheme.primary,
+                              foregroundColor: isRegistered
+                                  ? colorScheme.onSurface
+                                  : Colors.black,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.radius16,
+                                ),
+                                side: isRegistered
+                                    ? BorderSide(color: colorScheme.outline)
+                                    : BorderSide.none,
                               ),
                             ),
-                          ),
-                          child: Text(
-                            isRegistered ? 'Registered' : 'Register Now',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: isRegistered
-                                  ? colorScheme.onSurfaceVariant
-                                  : colorScheme.onPrimary,
-                              fontWeight: isRegistered
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                            child: Text(
+                              (isRegistered ? 'REGISTERED' : 'REGISTER NOW')
+                                  .toUpperCase(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 1.2,
+                                fontFamily: 'Orbitron',
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         );
                       },
                     )
                   else
-                    // Informational chip shown for live matches
+                    // Live Banner
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0,
-                        vertical: AppSizes.space8,
-                      ),
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: colorScheme.primary.withValues(alpha: 0.12),
+                        color: colorScheme.error.withAlpha(30),
                         borderRadius: BorderRadius.circular(AppSizes.radius16),
                         border: Border.all(
-                          color: colorScheme.primary.withValues(alpha: 0.4),
+                          color: colorScheme.error.withAlpha(100),
                         ),
                       ),
-                      child: Text(
-                        'In Progress',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.primary,
-                          fontWeight: FontWeight.bold,
+                      child: Center(
+                        child: Text(
+                          'MATCH IN PROGRESS',
+                          style: textTheme.labelLarge?.copyWith(
+                            color: colorScheme.error.withAlpha(180),
+                            letterSpacing: 1.5,
+                          ),
                         ),
                       ),
                     ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ── Pulsing Live Badge ────────────────────────────────────────────────────────
+// ── Sub-widgets ─────────────────────────────────────────────────────────────
 
-class _LiveBadge extends StatefulWidget {
+class _StatItem extends StatelessWidget {
+  final IconData icon;
+  final String text;
   final ColorScheme colorScheme;
-  const _LiveBadge({required this.colorScheme});
-
-  @override
-  State<_LiveBadge> createState() => LiveBadgeState();
-}
-
-class LiveBadgeState extends State<_LiveBadge>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _pulse;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..repeat(reverse: true);
-    _pulse = Tween<double>(
-      begin: 0.6,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  const _StatItem({
+    required this.icon,
+    required this.text,
+    required this.colorScheme,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _pulse,
-      builder: (context, child) => Opacity(
-        opacity: _pulse.value,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: widget.colorScheme.error,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const SizedBox(width: 5),
-              Text(
-                'LIVE',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.1,
-                ),
-              ),
-            ],
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: colorScheme.onSurfaceVariant),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
           ),
         ),
-      ),
+      ],
+    );
+  }
+}
+
+class _TimeInfo extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final ColorScheme colorScheme;
+  final bool highlight;
+
+  const _TimeInfo({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.colorScheme,
+    this.highlight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Icon(
+              icon,
+              size: 12,
+              color: highlight ? colorScheme.primary : colorScheme.onSurface,
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                value,
+                style: TextStyle(
+                  color: highlight
+                      ? colorScheme.primary
+                      : colorScheme.onSurface,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

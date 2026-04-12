@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
-import 'package:firedrop/shared/models/teams_model.dart';
-import 'package:firedrop/shared/models/users_model.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/shared/models/teams_model.dart';
+import 'package:eagle_esports/shared/models/users_model.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
 
 class MyTeamScreen extends ConsumerStatefulWidget {
   final TournamentModel tournament;

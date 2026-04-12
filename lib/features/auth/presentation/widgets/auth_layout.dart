@@ -1,4 +1,4 @@
-import 'package:firedrop/core/theme/app_colors.dart';
+import 'package:eagle_esports/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AuthLayout extends StatelessWidget {

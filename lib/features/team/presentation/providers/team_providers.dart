@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firedrop/features/team/data/repositories/team_repository.dart';
-import 'package:firedrop/features/team/data/services/team_service.dart';
-import 'package:firedrop/shared/models/teams_model.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/features/team/data/repositories/team_repository.dart';
+import 'package:eagle_esports/features/team/data/services/team_service.dart';
+import 'package:eagle_esports/shared/models/teams_model.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
 
 final teamRepositoryProvider = Provider<TeamRepository>((ref) {
   return TeamRepository();
@@ -14,37 +14,40 @@ final teamServiceProvider = Provider<TeamService>((ref) {
   return TeamService(repo);
 });
 
-final userTeamForTournamentProvider = 
-  StreamProvider.family<TeamModel?, String>((ref, tournamentId) async* {
-    final user = ref.watch(currentUserProvider).value;
-    if (user == null) {
-      yield null;
-      return;
-    }
-    
-    // Instead of querying by ID, we compute it synchronously from our existing stream
-    final userTeams = ref.watch(userJoinedTeamsProvider).value ?? [];
-    try {
-      yield userTeams.firstWhere((t) => t.tournamentId == tournamentId);
-    } catch (e) {
-      yield null; // not found
-    }
-  });
+final userTeamForTournamentProvider = StreamProvider.family<TeamModel?, String>((
+  ref,
+  tournamentId,
+) async* {
+  final user = ref.watch(currentUserProvider).value;
+  if (user == null) {
+    yield null;
+    return;
+  }
 
-final userJoinedTeamsProvider = 
-  StreamProvider<List<TeamModel>>((ref) async* {
-    final user = ref.watch(currentUserProvider).value;
-    if (user == null) {
-      yield [];
-      return;
-    }
-    final service = ref.watch(teamServiceProvider);
-    yield* service.streamUserTeams(user.uid);
-  });
+  // Instead of querying by ID, we compute it synchronously from our existing stream
+  final userTeams = ref.watch(userJoinedTeamsProvider).value ?? [];
+  try {
+    yield userTeams.firstWhere((t) => t.tournamentId == tournamentId);
+  } catch (e) {
+    yield null; // not found
+  }
+});
+
+final userJoinedTeamsProvider = StreamProvider<List<TeamModel>>((ref) async* {
+  final user = ref.watch(currentUserProvider).value;
+  if (user == null) {
+    yield [];
+    return;
+  }
+  final service = ref.watch(teamServiceProvider);
+  yield* service.streamUserTeams(user.uid);
+});
 
 /// Streams the real-time count of teams registered for [tournamentId].
-final teamsCountProvider =
-    StreamProvider.family<int, String>((ref, tournamentId) {
+final teamsCountProvider = StreamProvider.family<int, String>((
+  ref,
+  tournamentId,
+) {
   return FirebaseFirestore.instance
       .collection('teams')
       .where('tournamentId', isEqualTo: tournamentId)

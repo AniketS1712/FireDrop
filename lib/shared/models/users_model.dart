@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedrop/core/constant/app_enums.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
 
 class UserModel {
   final String uid;

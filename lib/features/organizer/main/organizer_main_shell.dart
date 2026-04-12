@@ -1,14 +1,14 @@
 import 'dart:ui';
-import 'package:firedrop/core/theme/app_colors.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/shared/widgets/nav_item.dart';
-import 'package:firedrop/shared/widgets/states/coming_soon.dart';
+import 'package:eagle_esports/core/theme/app_colors.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/shared/widgets/nav_item.dart';
+import 'package:eagle_esports/shared/widgets/states/coming_soon.dart';
 import 'package:flutter/material.dart';
-import 'package:firedrop/features/organizer/dashboard/presentation/widgets/header.dart';
-import 'package:firedrop/features/organizer/dashboard/presentation/screens/organizer_dashboard_screen.dart';
-import 'package:firedrop/features/profile/presentation/screens/organizer_profile_screen.dart';
-import 'package:firedrop/features/tournament/presentation/screens/organizer_tournaments_screen.dart';
-import 'package:firedrop/shared/widgets/top_safe_area.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/widgets/header.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/screens/organizer_dashboard_screen.dart';
+import 'package:eagle_esports/features/profile/presentation/screens/organizer_profile_screen.dart';
+import 'package:eagle_esports/features/tournament/presentation/screens/organizer_tournaments_screen.dart';
+import 'package:eagle_esports/shared/widgets/top_safe_area.dart';
 
 class OrganizerMainShell extends StatefulWidget {
   const OrganizerMainShell({super.key});

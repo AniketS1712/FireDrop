@@ -1,6 +1,6 @@
 import 'package:uuid/uuid.dart';
-import 'package:firedrop/shared/models/video_model.dart';
-import 'package:firedrop/features/video/data/repositories/video_repository.dart';
+import 'package:eagle_esports/shared/models/video_model.dart';
+import 'package:eagle_esports/features/video/data/repositories/video_repository.dart';
 
 class VideoService {
   final VideoRepository _repository;

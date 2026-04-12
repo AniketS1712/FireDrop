@@ -1,12 +1,12 @@
-import 'package:firedrop/features/organizer/dashboard/presentation/screens/tournament_sheet.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/screens/tournament_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
 
-import 'package:firedrop/features/organizer/dashboard/presentation/widgets/stats_grid.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
-import 'package:firedrop/features/organizer/dashboard/presentation/widgets/quick_management.dart';
-import 'package:firedrop/features/tournament/presentation/providers/tournament_providers.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/widgets/stats_grid.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/widgets/quick_management.dart';
+import 'package:eagle_esports/features/tournament/presentation/providers/tournament_providers.dart';
 
 class OrganizerDashboardScreen extends ConsumerStatefulWidget {
   const OrganizerDashboardScreen({super.key});

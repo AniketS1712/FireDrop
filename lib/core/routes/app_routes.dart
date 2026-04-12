@@ -1,22 +1,24 @@
-import 'package:firedrop/features/organizer/dashboard/presentation/screens/tournament_sheet.dart';
-import 'package:firedrop/features/leaderboard/presentation/screens/leaderboard_screen.dart';
-import 'package:firedrop/features/profile/presentation/screens/profile_screen.dart';
-import 'package:firedrop/features/room_creation/presentation/screens/create_room_screen.dart';
-import 'package:firedrop/features/room_creation/presentation/screens/join_room_screen.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
-import 'package:firedrop/shared/models/users_model.dart';
-import 'package:firedrop/shared/models/video_model.dart';
-import 'package:firedrop/features/home/presentation/screen/home_screen.dart';
-import 'package:firedrop/features/auth/presentation/screens/login_screen.dart';
-import 'package:firedrop/features/organizer/main/organizer_main_shell.dart';
-import 'package:firedrop/features/auth/presentation/screens/signup_screen.dart';
-import 'package:firedrop/features/splash/splash_screen.dart';
-import 'package:firedrop/features/tournament/presentation/screens/tournament_screen.dart';
-import 'package:firedrop/features/video/presentation/screens/video_player_screen.dart';
-import 'package:firedrop/features/video/presentation/screens/videos_screen.dart';
-import 'package:firedrop/features/auth/presentation/screens/forgot_password_screen.dart';
-import 'package:firedrop/core/routes/route_names.dart';
-import 'package:firedrop/core/routes/route_paths.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/screens/tournament_sheet.dart';
+import 'package:eagle_esports/features/leaderboard/presentation/screens/leaderboard_screen.dart';
+import 'package:eagle_esports/features/profile/presentation/screens/profile_screen.dart';
+import 'package:eagle_esports/features/room_creation/presentation/screens/create_room_screen.dart';
+import 'package:eagle_esports/features/room_creation/presentation/screens/join_room_screen.dart';
+import 'package:eagle_esports/features/team/presentation/screens/my_team_screen.dart';
+import 'package:eagle_esports/shared/models/teams_model.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/shared/models/users_model.dart';
+import 'package:eagle_esports/shared/models/video_model.dart';
+import 'package:eagle_esports/features/home/presentation/screen/home_screen.dart';
+import 'package:eagle_esports/features/auth/presentation/screens/login_screen.dart';
+import 'package:eagle_esports/features/organizer/main/organizer_main_shell.dart';
+import 'package:eagle_esports/features/auth/presentation/screens/signup_screen.dart';
+import 'package:eagle_esports/features/splash/splash_screen.dart';
+import 'package:eagle_esports/features/tournament/presentation/screens/tournament_screen.dart';
+import 'package:eagle_esports/features/video/presentation/screens/video_player_screen.dart';
+import 'package:eagle_esports/features/video/presentation/screens/videos_screen.dart';
+import 'package:eagle_esports/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:eagle_esports/core/routes/route_names.dart';
+import 'package:eagle_esports/core/routes/route_paths.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRoutes {
@@ -110,6 +112,18 @@ class AppRoutes {
       path: RoutePaths.videos,
       name: RouteNames.videos,
       builder: (context, state) => const VideosScreen(),
+    ),
+
+    GoRoute(
+      path: RoutePaths.myTeam,
+      name: RouteNames.myTeam,
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>;
+        return MyTeamScreen(
+          tournament: data['tournament'] as TournamentModel,
+          team: data['team'] as TeamModel,
+        );
+      },
     ),
   ];
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
 
 Future<RoomDetails?> showStartMatchDialog(BuildContext context) {
   final roomIdController = TextEditingController();

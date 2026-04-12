@@ -1,31 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedrop/shared/models/leaderboard_entry.dart';
-import 'package:firedrop/shared/models/leaderboard_template.dart';
-import 'package:firedrop/shared/models/teams_model.dart';
-import 'package:firedrop/shared/models/users_model.dart';
+import 'package:eagle_esports/shared/models/leaderboard_entry.dart';
+import 'package:eagle_esports/shared/models/leaderboard_template.dart';
+import 'package:eagle_esports/shared/models/teams_model.dart';
+import 'package:eagle_esports/shared/models/users_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ─── Stream of teams for a tournament ────────────────────────────────────────
 
-final tournamentTeamsProvider =
-    StreamProvider.family<List<TeamModel>, String>((ref, tournamentId) {
+final tournamentTeamsProvider = StreamProvider.family<List<TeamModel>, String>((
+  ref,
+  tournamentId,
+) {
   return FirebaseFirestore.instance
       .collection('teams')
       .where('tournamentId', isEqualTo: tournamentId)
       .snapshots()
       .map(
-        (snap) => snap.docs
-            .map((d) => TeamModel.fromMap(d.data(), d.id))
-            .toList(),
+        (snap) =>
+            snap.docs.map((d) => TeamModel.fromMap(d.data(), d.id)).toList(),
       );
 });
 
 // ─── Fetch a single user display name (leader) ───────────────────────────────
 
-final userByIdProvider =
-    FutureProvider.family<UserModel?, String>((ref, uid) async {
-  final doc =
-      await FirebaseFirestore.instance.collection('users').doc(uid).get();
+final userByIdProvider = FutureProvider.family<UserModel?, String>((
+  ref,
+  uid,
+) async {
+  final doc = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(uid)
+      .get();
   if (!doc.exists || doc.data() == null) return null;
   return UserModel.fromMap(doc.data()!, doc.id);
 });
@@ -87,8 +92,7 @@ class LeaderboardService {
   static Future<Map<String, dynamic>?> fetchLeaderboard(
     String tournamentId,
   ) async {
-    final doc =
-        await _db.collection('leaderboards').doc(tournamentId).get();
+    final doc = await _db.collection('leaderboards').doc(tournamentId).get();
     return doc.exists ? doc.data() : null;
   }
 }

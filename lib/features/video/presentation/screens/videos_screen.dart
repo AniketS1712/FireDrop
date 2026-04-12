@@ -4,16 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/core/routes/route_names.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
+import 'package:eagle_esports/core/routes/route_names.dart';
 
-import 'package:firedrop/shared/models/video_model.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
-import 'package:firedrop/features/video/presentation/providers/video_providers.dart';
-import 'package:firedrop/shared/widgets/loading_shimmer.dart';
-import 'package:firedrop/shared/widgets/states/empty_state.dart';
-import 'package:firedrop/shared/widgets/states/error_state.dart';
+import 'package:eagle_esports/shared/models/video_model.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/features/video/presentation/providers/video_providers.dart';
+import 'package:eagle_esports/shared/widgets/loading_shimmer.dart';
+import 'package:eagle_esports/shared/widgets/states/empty_state.dart';
+import 'package:eagle_esports/shared/widgets/states/error_state.dart';
 
 class VideosScreen extends ConsumerStatefulWidget {
   const VideosScreen({super.key});
@@ -23,7 +23,6 @@ class VideosScreen extends ConsumerStatefulWidget {
 }
 
 class _VideosScreenState extends ConsumerState<VideosScreen> {
-
   void _showAddVideoSheet() {
     showModalBottomSheet(
       context: context,
@@ -43,7 +42,14 @@ class _VideosScreenState extends ConsumerState<VideosScreen> {
     return Scaffold(
       backgroundColor: scheme.surface,
       appBar: AppBar(
-        title: Text('Highlights & Streams', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: scheme.onSurface)),
+        title: Text(
+          'Highlights & Streams',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: scheme.onSurface,
+          ),
+        ),
         backgroundColor: scheme.surface,
         elevation: 0,
         centerTitle: true,
@@ -53,7 +59,13 @@ class _VideosScreenState extends ConsumerState<VideosScreen> {
               onPressed: _showAddVideoSheet,
               backgroundColor: scheme.primary,
               icon: Icon(Icons.add, color: scheme.onPrimary),
-              label: Text('Add Video', style: TextStyle(color: scheme.onPrimary, fontWeight: FontWeight.bold)),
+              label: Text(
+                'Add Video',
+                style: TextStyle(
+                  color: scheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             )
           : null,
       body: videosAsync.when(
@@ -64,7 +76,12 @@ class _VideosScreenState extends ConsumerState<VideosScreen> {
             return const EmptyState(message: 'No videos available right now!');
           }
           return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(AppSizes.space16, AppSizes.space16, AppSizes.space16, 100),
+            padding: const EdgeInsets.fromLTRB(
+              AppSizes.space16,
+              AppSizes.space16,
+              AppSizes.space16,
+              100,
+            ),
             itemCount: videos.length,
             itemBuilder: (context, index) {
               return _VideoCard(video: videos[index], isOrganizer: isOrganizer);
@@ -85,7 +102,8 @@ class _VideoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final thumbnailUrl = 'https://img.youtube.com/vi/${video.youtubeVideoId}/maxresdefault.jpg';
+    final thumbnailUrl =
+        'https://img.youtube.com/vi/${video.youtubeVideoId}/maxresdefault.jpg';
 
     return GestureDetector(
       onTap: () {
@@ -131,7 +149,11 @@ class _VideoCard extends StatelessWidget {
                       color: Colors.black45,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 40),
+                    child: const Icon(
+                      Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 40,
+                    ),
                   ),
                 ],
               ),
@@ -158,13 +180,18 @@ class _VideoCard extends StatelessWidget {
                         Consumer(
                           builder: (context, ref, _) {
                             return IconButton(
-                              icon: Icon(Icons.delete_outline, color: scheme.error),
+                              icon: Icon(
+                                Icons.delete_outline,
+                                color: scheme.error,
+                              ),
                               onPressed: () {
-                                ref.read(videoServiceProvider).deleteVideo(video.id);
+                                ref
+                                    .read(videoServiceProvider)
+                                    .deleteVideo(video.id);
                               },
                             );
-                          }
-                        )
+                          },
+                        ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -224,19 +251,24 @@ class _AddVideoSheetState extends ConsumerState<_AddVideoSheet> {
         final userId = FirebaseAuth.instance.currentUser?.uid;
         if (userId == null) throw Exception("User not logged in");
 
-        await ref.read(videoServiceProvider).createVideo(
-          title: _titleCtrl.text.trim(),
-          youtubeVideoId: _videoIdCtrl.text.trim(),
-          description: _descCtrl.text.trim(),
-          addedByUserId: userId,
-        );
+        await ref
+            .read(videoServiceProvider)
+            .createVideo(
+              title: _titleCtrl.text.trim(),
+              youtubeVideoId: _videoIdCtrl.text.trim(),
+              description: _descCtrl.text.trim(),
+              addedByUserId: userId,
+            );
 
         if (mounted) Navigator.pop(context);
       } catch (e) {
         if (mounted) {
           final scheme = Theme.of(context).colorScheme;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to add video: $e'), backgroundColor: scheme.error),
+            SnackBar(
+              content: Text('Failed to add video: $e'),
+              backgroundColor: scheme.error,
+            ),
           );
         }
       } finally {
@@ -252,7 +284,9 @@ class _AddVideoSheetState extends ConsumerState<_AddVideoSheet> {
     return Container(
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppSizes.radius24)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppSizes.radius24),
+        ),
       ),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSizes.space24,
@@ -313,11 +347,17 @@ class _AddVideoSheetState extends ConsumerState<_AddVideoSheet> {
                     ? SizedBox(
                         height: 24,
                         width: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: scheme.onPrimary),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: scheme.onPrimary,
+                        ),
                       )
                     : const Text(
                         'UPLOAD VIDEO',
-                        style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.2),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                        ),
                       ),
               ),
             ),
@@ -356,7 +396,10 @@ class _AddVideoSheetState extends ConsumerState<_AddVideoSheet> {
           borderRadius: BorderRadius.circular(AppSizes.radius16),
           borderSide: BorderSide(color: scheme.primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
       validator: (val) {
         if (val == null || val.trim().isEmpty) return 'Required field';

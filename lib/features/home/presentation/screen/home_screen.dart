@@ -1,24 +1,24 @@
-import 'package:firedrop/core/theme/app_colors.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/core/theme/app_colors.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firedrop/core/routes/route_names.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/features/tournament/presentation/providers/tournament_providers.dart';
-import 'package:firedrop/shared/widgets/top_safe_area.dart';
-import 'package:firedrop/features/home/presentation/widgets/section_header.dart';
-import 'package:firedrop/features/home/presentation/widgets/home_chips.dart';
-import 'package:firedrop/features/home/presentation/widgets/home_header.dart';
-import 'package:firedrop/shared/widgets/loading_shimmer.dart';
-import 'package:firedrop/shared/widgets/main_bottom_nav.dart';
-import 'package:firedrop/features/home/presentation/widgets/match_card.dart';
-import 'package:firedrop/shared/widgets/states/empty_state.dart';
-import 'package:firedrop/shared/widgets/states/error_state.dart';
-import 'package:firedrop/shared/widgets/animations/animated_tournament_card.dart';
-import 'package:firedrop/features/video/presentation/screens/videos_screen.dart';
-import 'package:firedrop/features/profile/presentation/screens/profile_screen.dart';
-import 'package:firedrop/features/home/presentation/screen/matches_screen.dart';
+import 'package:eagle_esports/core/routes/route_names.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/features/tournament/presentation/providers/tournament_providers.dart';
+import 'package:eagle_esports/shared/widgets/top_safe_area.dart';
+import 'package:eagle_esports/features/home/presentation/widgets/section_header.dart';
+import 'package:eagle_esports/features/home/presentation/widgets/home_chips.dart';
+import 'package:eagle_esports/features/home/presentation/widgets/home_header.dart';
+import 'package:eagle_esports/shared/widgets/loading_shimmer.dart';
+import 'package:eagle_esports/shared/widgets/main_bottom_nav.dart';
+import 'package:eagle_esports/features/home/presentation/widgets/match_card.dart';
+import 'package:eagle_esports/shared/widgets/states/empty_state.dart';
+import 'package:eagle_esports/shared/widgets/states/error_state.dart';
+import 'package:eagle_esports/shared/widgets/animations/animated_tournament_card.dart';
+import 'package:eagle_esports/features/video/presentation/screens/videos_screen.dart';
+import 'package:eagle_esports/features/profile/presentation/screens/profile_screen.dart';
+import 'package:eagle_esports/features/home/presentation/screen/matches_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -79,18 +79,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     switch (statusFilter) {
       case TournamentFilter.live:
         sectionTitle = 'Live Now';
-        sectionSubtitle = 'Join before slots fill up';
+        sectionSubtitle = 'Join now before spots are gone';
         showLiveDot = true;
         break;
 
       case TournamentFilter.upcoming:
-        sectionTitle = 'Upcoming Tournaments';
-        sectionSubtitle = 'Register and get ready to compete';
+        sectionTitle = 'Upcoming Matches';
+        sectionSubtitle = 'Sign up and get ready to play';
         break;
 
       case TournamentFilter.joined:
-        sectionTitle = 'Your Tournaments';
-        sectionSubtitle = 'Tournaments you have joined';
+        sectionTitle = 'Your Entries';
+        sectionSubtitle = 'Tournaments you\'re participating in';
         break;
     }
 
@@ -176,7 +176,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     ),
                                     child: MatchCard(
                                       tournament: tournament,
-                                      onJoin: () {
+                                      onTap: () {
                                         context.pushNamed(
                                           RouteNames.tournamentDetail,
                                           extra: tournament,

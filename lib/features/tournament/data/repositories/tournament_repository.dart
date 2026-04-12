@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
 
 class TournamentRepository {
   TournamentRepository({FirebaseFirestore? firestore})
@@ -86,15 +86,13 @@ class TournamentRepository {
     return _tournaments
         .where('organizerId', isEqualTo: organizerId)
         .snapshots()
-        .map(
-          (snapshot) {
-            final list = snapshot.docs
-                .map((doc) => TournamentModel.fromMap(doc.data(), doc.id))
-                .toList();
-            list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-            return list;
-          },
-        );
+        .map((snapshot) {
+          final list = snapshot.docs
+              .map((doc) => TournamentModel.fromMap(doc.data(), doc.id))
+              .toList();
+          list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return list;
+        });
   }
 
   // ================= AUTO-TRANSITION TO LIVE =================

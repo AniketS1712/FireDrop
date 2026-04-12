@@ -1,9 +1,9 @@
-import 'package:firedrop/core/routes/route_names.dart';
+import 'package:eagle_esports/core/routes/route_names.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
 
 class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});

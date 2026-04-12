@@ -1,8 +1,8 @@
-import 'package:firedrop/shared/models/tournaments_model.dart';
-import 'package:firedrop/features/tournament/data/repositories/tournament_repository.dart';
-import 'package:firedrop/features/tournament/data/services/tournament_service.dart';
-import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/features/team/presentation/providers/team_providers.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/features/tournament/data/repositories/tournament_repository.dart';
+import 'package:eagle_esports/features/tournament/data/services/tournament_service.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
+import 'package:eagle_esports/features/team/presentation/providers/team_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // ================= FILTERS =================
@@ -63,7 +63,8 @@ final filteredTournamentsProvider = Provider<AsyncValue<List<TournamentModel>>>(
     final joinedTeamsAsync = ref.watch(userJoinedTeamsProvider);
 
     return publicAsync.whenData((tournaments) {
-      final joinedTournamentIds = joinedTeamsAsync.value?.map((t) => t.tournamentId).toSet() ?? {};
+      final joinedTournamentIds =
+          joinedTeamsAsync.value?.map((t) => t.tournamentId).toSet() ?? {};
 
       return tournaments.where((t) {
         // 1. Status Filter
@@ -75,7 +76,7 @@ final filteredTournamentsProvider = Provider<AsyncValue<List<TournamentModel>>>(
           case TournamentFilter.upcoming:
             statusMatches =
                 (t.status == TournamentStatus.upcoming ||
-                 t.status == TournamentStatus.registrationOpen) &&
+                    t.status == TournamentStatus.registrationOpen) &&
                 !joinedTournamentIds.contains(t.id);
             break;
           case TournamentFilter.live:
@@ -131,12 +132,15 @@ final tournamentStatusSyncProvider = StreamProvider<void>((ref) async* {
 
       if (shouldTransition) {
         transitioning.add(t.id);
-        service.autoTransitionToLive(t.id).then((value) {
-          transitioning.remove(t.id);
-        }).catchError((e) {
-          transitioning.remove(t.id);
-          // Silently ignore — the stream will retry on next emission.
-        });
+        service
+            .autoTransitionToLive(t.id)
+            .then((value) {
+              transitioning.remove(t.id);
+            })
+            .catchError((e) {
+              transitioning.remove(t.id);
+              // Silently ignore — the stream will retry on next emission.
+            });
       }
     }
   }

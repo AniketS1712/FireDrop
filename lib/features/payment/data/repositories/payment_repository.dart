@@ -1,37 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedrop/shared/models/payment_model.dart';
+import 'package:eagle_esports/shared/models/payment_model.dart';
 
-/// ─── Payment Repository ────────────────────────────────────────────────────
-/// Handles all Firestore operations for the `payments` collection.
-///
-/// Firestore Structure:
-///   payments/
-///     {paymentId}/
-///       orderId, userId, tournamentId, amount, status, ...
-///
-/// Indexes required:
-///   - (userId, tournamentId) → for checking existing payments
-///   - (tournamentId, status) → for tournament payment reports
-///   - (userId, status) → for user payment history
 class PaymentRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Reference to the `payments` collection.
   CollectionReference get _payments => _firestore.collection('payments');
 
   // ═════════════════════ CREATE ═════════════════════
-
-  /// Creates a new payment record in Firestore.
-  /// Uses the [payment.id] as the document ID for easy lookups.
   Future<void> createPayment(PaymentModel payment) async {
     await _payments.doc(payment.id).set(payment.toMap());
   }
 
   // ═════════════════════ UPDATE ═════════════════════
-
-  /// Updates specific fields of a payment document.
-  /// Uses Firestore merge to avoid overwriting unmodified fields.
-  Future<void> updatePayment(String paymentId, Map<String, dynamic> data) async {
+  Future<void> updatePayment(
+    String paymentId,
+    Map<String, dynamic> data,
+  ) async {
     data['updatedAt'] = FieldValue.serverTimestamp();
     await _payments.doc(paymentId).update(data);
   }
@@ -70,8 +54,6 @@ class PaymentRepository {
   }
 
   // ═════════════════════ READ ═════════════════════
-
-  /// Fetches a single payment by its document ID.
   Future<PaymentModel?> getPaymentById(String paymentId) async {
     final doc = await _payments.doc(paymentId).get();
     if (!doc.exists) return null;
@@ -101,12 +83,15 @@ class PaymentRepository {
     final snapshot = await _payments
         .where('userId', isEqualTo: userId)
         .where('tournamentId', isEqualTo: tournamentId)
-        .where('status', whereIn: [
-          PaymentStatus.success.name,
-          PaymentStatus.created.name,
-          PaymentStatus.initiated.name,
-          PaymentStatus.pending.name,
-        ])
+        .where(
+          'status',
+          whereIn: [
+            PaymentStatus.success.name,
+            PaymentStatus.created.name,
+            PaymentStatus.initiated.name,
+            PaymentStatus.pending.name,
+          ],
+        )
         .orderBy('createdAt', descending: true)
         .limit(1)
         .get();
@@ -124,8 +109,10 @@ class PaymentRepository {
         .get();
 
     return snapshot.docs
-        .map((doc) =>
-            PaymentModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .map(
+          (doc) =>
+              PaymentModel.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+        )
         .toList();
   }
 
@@ -137,8 +124,10 @@ class PaymentRepository {
         .get();
 
     return snapshot.docs
-        .map((doc) =>
-            PaymentModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .map(
+          (doc) =>
+              PaymentModel.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+        )
         .toList();
   }
 
@@ -159,10 +148,10 @@ class PaymentRepository {
 
     final snapshot = await _payments
         .where('userId', isEqualTo: userId)
-        .where('status', whereIn: [
-          PaymentStatus.created.name,
-          PaymentStatus.initiated.name,
-        ])
+        .where(
+          'status',
+          whereIn: [PaymentStatus.created.name, PaymentStatus.initiated.name],
+        )
         .get();
 
     final batch = _firestore.batch();

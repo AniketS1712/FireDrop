@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firedrop/shared/models/leaderboard_template.dart';
+import 'package:eagle_esports/shared/models/leaderboard_template.dart';
 
 /// A single standing row from the published leaderboard.
 class PublishedStanding {
@@ -56,10 +56,11 @@ class PublishedLeaderboard {
     String tournamentId,
   ) {
     final rawStandings = (map['standings'] as List?) ?? [];
-    final standings = rawStandings
-        .map((s) => PublishedStanding.fromMap(Map<String, dynamic>.from(s)))
-        .toList()
-      ..sort((a, b) => a.rank.compareTo(b.rank));
+    final standings =
+        rawStandings
+            .map((s) => PublishedStanding.fromMap(Map<String, dynamic>.from(s)))
+            .toList()
+          ..sort((a, b) => a.rank.compareTo(b.rank));
 
     DateTime? updatedAt;
     final raw = map['updatedAt'];
@@ -87,12 +88,12 @@ class PublishedLeaderboard {
 /// Emits null if no document exists yet.
 final publishedLeaderboardProvider =
     StreamProvider.family<PublishedLeaderboard?, String>((ref, tournamentId) {
-  return FirebaseFirestore.instance
-      .collection('leaderboards')
-      .doc(tournamentId)
-      .snapshots()
-      .map((snap) {
-    if (!snap.exists || snap.data() == null) return null;
-    return PublishedLeaderboard.fromMap(snap.data()!, tournamentId);
-  });
-});
+      return FirebaseFirestore.instance
+          .collection('leaderboards')
+          .doc(tournamentId)
+          .snapshots()
+          .map((snap) {
+            if (!snap.exists || snap.data() == null) return null;
+            return PublishedLeaderboard.fromMap(snap.data()!, tournamentId);
+          });
+    });

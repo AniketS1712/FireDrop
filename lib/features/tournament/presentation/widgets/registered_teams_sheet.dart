@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-// import 'package:firedrop/core/theme/app_colors.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/features/leaderboard/presentation/providers/leaderboard_providers.dart';
-import 'package:firedrop/shared/models/teams_model.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
+// import 'package:eagle_esports/core/theme/app_colors.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/features/leaderboard/presentation/providers/leaderboard_providers.dart';
+import 'package:eagle_esports/shared/models/teams_model.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
 
 class RegisteredTeamsSheet extends ConsumerWidget {
   final TournamentModel tournament;

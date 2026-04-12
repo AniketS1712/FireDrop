@@ -1,6 +1,6 @@
-import 'package:firedrop/core/theme/app_colors.dart';
-import 'package:firedrop/core/theme/app_components.dart';
-import 'package:firedrop/core/theme/app_typography.dart';
+import 'package:eagle_esports/core/theme/app_colors.dart';
+import 'package:eagle_esports/core/theme/app_components.dart';
+import 'package:eagle_esports/core/theme/app_typography.dart';
 import 'package:flutter/material.dart';
 
 class AppThemes {

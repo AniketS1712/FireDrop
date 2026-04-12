@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedrop/shared/models/video_model.dart';
+import 'package:eagle_esports/shared/models/video_model.dart';
 
 class VideoRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -15,10 +15,18 @@ class VideoRepository {
   }
 
   Stream<List<VideoModel>> getVideosStream() {
-    return _videos.orderBy('createdAt', descending: true).snapshots().map(
-      (snapshot) => snapshot.docs.map(
-        (doc) => VideoModel.fromMap(doc.data() as Map<String, dynamic>, doc.id),
-      ).toList(),
-    );
+    return _videos
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => VideoModel.fromMap(
+                  doc.data() as Map<String, dynamic>,
+                  doc.id,
+                ),
+              )
+              .toList(),
+        );
   }
 }

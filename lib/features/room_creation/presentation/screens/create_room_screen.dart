@@ -1,14 +1,15 @@
-import 'package:firedrop/features/team/presentation/screens/registration_success_screen.dart';
+import 'package:eagle_esports/core/routes/route_names.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
-import 'package:firedrop/shared/models/payment_model.dart';
-import 'package:firedrop/features/team/presentation/providers/team_providers.dart';
-import 'package:firedrop/features/payment/presentation/providers/payment_providers.dart';
-import 'package:firedrop/features/payment/data/services/cashfree_service.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/shared/models/payment_model.dart';
+import 'package:eagle_esports/features/team/presentation/providers/team_providers.dart';
+import 'package:eagle_esports/features/payment/presentation/providers/payment_providers.dart';
+import 'package:eagle_esports/features/payment/data/services/cashfree_service.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
 
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -58,27 +59,34 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
       _paymentStatusText = null;
     });
 
+    bool willHandleLoadingInCallbacks = false;
+
     try {
       if (widget.tournament.entryFee > 0) {
-        // ── Platform check: Cashfree SDK only works on Android/iOS ──
         if (kIsWeb || (!Platform.isAndroid && !Platform.isIOS)) {
-          // On unsupported platforms, skip payment for testing
-          _showInfoSnackBar(
-            'Payment skipped on this platform (testing mode)',
-          );
+          _showInfoSnackBar('Payment skipped on this platform (testing mode)');
           await _createTeamOnServer();
         } else {
-          // ── Start Cashfree payment flow ──────────────────────────
+          willHandleLoadingInCallbacks = true;
           await _startCashfreePayment();
         }
       } else {
-        // ── No entry fee — create team directly ─────────────────────
         await _createTeamOnServer();
       }
     } on CashfreePaymentException catch (e) {
       _handlePaymentError(e.message);
     } catch (e) {
       _handlePaymentError(e.toString());
+    } finally {
+      // If we started a payment flow, the callbacks (onPaymentSuccess/onPaymentFailure)
+      // will handle resetting the loading state. We only reset here if we didn't
+      // start that flow or if an immediate error occurred.
+      if (!willHandleLoadingInCallbacks && mounted) {
+        setState(() {
+          _isLoading = false;
+          _paymentStatusText = null;
+        });
+      }
     }
   }
 
@@ -99,7 +107,9 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     // ── Set up callbacks BEFORE initiating payment ──────────────────
     cashfreeService.onPaymentSuccess = (PaymentModel payment) async {
       if (!mounted) return;
-      setState(() => _paymentStatusText = 'Payment successful! Creating team...');
+      setState(
+        () => _paymentStatusText = 'Payment successful! Creating team...',
+      );
 
       try {
         await _createTeamOnServer(paymentId: payment.id);
@@ -127,23 +137,22 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     };
 
     // ── Initiate payment ────────────────────────────────────────────
-    // Convert entry fee from rupees to paise
-    final entryFeeInPaise = widget.tournament.entryFee * 100;
-
     final existingPayment = await cashfreeService.initiatePayment(
       userId: firebaseUser.uid,
       userName: currentUser.name,
       userEmail: currentUser.email,
       userPhone: currentUser.phone,
       tournamentId: widget.tournament.id,
-      entryFeeInPaise: entryFeeInPaise,
-      paymentType: 'create_room',
+      entryFeeInRupees: widget.tournament.entryFee,
+      paymentType: 'create_team',
     );
 
     // If there's an existing successful payment, create team directly
     if (existingPayment != null && existingPayment.isSuccessful) {
-      setState(() =>
-          _paymentStatusText = 'Payment already completed. Creating team...');
+      setState(
+        () =>
+            _paymentStatusText = 'Payment already completed. Creating team...',
+      );
       await _createTeamOnServer(paymentId: existingPayment.id);
     }
 
@@ -154,11 +163,16 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   // ═══════════════════════ TEAM CREATION ═══════════════════════
 
   Future<void> _createTeamOnServer({String? paymentId}) async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _paymentStatusText = 'Creating your team...';
+    });
+
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId == null) throw Exception('User not logged in');
-
-      setState(() => _paymentStatusText = 'Creating your team...');
 
       final team = await ref
           .read(teamServiceProvider)
@@ -184,24 +198,15 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
           final cashfreeService = ref.read(cashfreeServiceProvider);
           await cashfreeService.linkTeamToPayment(paymentId, team.id);
         } catch (e) {
-          // Non-critical: payment record linking failed
-          // The team is still created, just log the error
-          debugPrint(
-            '[CreateRoomScreen] Failed to link payment to team: $e',
-          );
+          debugPrint('[CreateRoomScreen] Failed to link payment to team: $e');
         }
       }
 
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => RegistrationSuccessScreen(
-            tournament: widget.tournament,
-            teamName: team.name,
-            teamCode: team.inviteCode ?? '',
-          ),
-        ),
+      // Navigate directly to My Team screen
+      context.pushReplacementNamed(
+        RouteNames.myTeam,
+        extra: <String, dynamic>{'tournament': widget.tournament, 'team': team},
       );
     } catch (e) {
       if (mounted) {
@@ -326,7 +331,7 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
           onPressed: _isLoading ? null : () => Navigator.pop(context),
         ),
         title: const Text(
-          'Create Room',
+          'Create Team',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -372,7 +377,9 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                     color: Theme.of(context).colorScheme.primary.withAlpha(15),
                     borderRadius: BorderRadius.circular(AppSizes.radius8),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.primary.withAlpha(40),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withAlpha(40),
                     ),
                   ),
                   child: Row(
@@ -458,16 +465,12 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   padding: const EdgeInsets.all(16),
                   margin: const EdgeInsets.only(bottom: AppSizes.space24),
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withAlpha(10),
+                    color: Theme.of(context).colorScheme.primary.withAlpha(10),
                     borderRadius: BorderRadius.circular(AppSizes.radius8),
                     border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withAlpha(30),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withAlpha(30),
                     ),
                   ),
                   child: Row(
@@ -508,32 +511,28 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                       gradient: LinearGradient(
                         colors: _isLoading
                             ? [
-                                Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer
-                                    .withAlpha(150),
-                                Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withAlpha(150),
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer.withAlpha(150),
+                                Theme.of(
+                                  context,
+                                ).colorScheme.primary.withAlpha(150),
                               ]
                             : [
-                                Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
                                 Theme.of(context).colorScheme.primary,
                               ],
                       ),
-                      borderRadius:
-                          BorderRadius.circular(AppSizes.radiusFull),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
                       boxShadow: _isLoading
                           ? []
                           : [
                               BoxShadow(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withAlpha(100),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withAlpha(100),
                                 blurRadius: 16,
                                 offset: const Offset(0, 4),
                               ),
@@ -573,19 +572,17 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                     Icon(
                       Icons.lock_outline,
                       size: 14,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurfaceVariant
-                          .withAlpha(120),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withAlpha(120),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       'Secured by Cashfree Payment Gateway',
                       style: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurfaceVariant
-                            .withAlpha(120),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withAlpha(120),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -615,10 +612,9 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
-          color: Theme.of(context)
-              .colorScheme
-              .onSurfaceVariant
-              .withOpacity(0.5),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withOpacity(0.5),
         ),
         prefixIcon: Icon(
           prefixIcon,
@@ -629,13 +625,11 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
         fillColor: Theme.of(context).colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          borderSide:
-              BorderSide(color: Theme.of(context).colorScheme.outline),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          borderSide:
-              BorderSide(color: Theme.of(context).colorScheme.outline),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius16),
@@ -646,8 +640,7 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSizes.radius16),
-          borderSide:
-              BorderSide(color: Theme.of(context).colorScheme.error),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
         ),
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,

@@ -1,36 +1,27 @@
-/// ─── Cashfree Payment Gateway Configuration ──────────────────────────────────
-///
-/// IMPORTANT: In production, the [appId] and [secretKey] should NEVER be stored
-/// in client-side code. Order creation MUST happen on a secure backend
-/// (e.g., Firebase Cloud Functions) that holds the secret key.
-///
-/// For development/testing, we use the SANDBOX environment.
-/// Switch to PRODUCTION when going live.
-///
-/// Setup checklist:
-///   1. Create a Cashfree merchant account at https://merchant.cashfree.com
-///   2. Generate API keys from the merchant dashboard
-///   3. Replace the placeholder values below with your actual keys
-///   4. Set up a backend endpoint for order creation (see [CashfreeService])
-/// ─────────────────────────────────────────────────────────────────────────────
 library;
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CashfreeConfig {
   CashfreeConfig._();
 
   // ── Environment ──────────────────────────────────────────────────────────
   /// Set to `true` for sandbox testing, `false` for production.
-  static const bool isSandbox = true;
+  /// Reads from `CASHFREE_IS_SANDBOX` in `.env`.
+  static bool get isSandbox =>
+      dotenv.env['CASHFREE_IS_SANDBOX']?.toLowerCase() == 'true';
 
   // ── API Credentials ──────────────────────────────────────────────────────
   /// Your Cashfree App ID (from merchant dashboard).
   /// Sandbox and production have different App IDs.
-  static const String appId = 'YOUR_CASHFREE_APP_ID';
+  /// Reads from `CASHFREE_APP_ID` in `.env`.
+  static String get appId => dotenv.env['CASHFREE_APP_ID'] ?? '';
 
   /// Your Cashfree Secret Key.
   /// ⚠️ DO NOT ship this in production client code!
   /// This should only be used in a secure backend.
-  static const String secretKey = 'YOUR_CASHFREE_SECRET_KEY';
+  /// Reads from `CASHFREE_SECRET_KEY` in `.env`.
+  static String get secretKey => dotenv.env['CASHFREE_SECRET_KEY'] ?? '';
 
   // ── API Endpoints ────────────────────────────────────────────────────────
   /// Base URL for Cashfree REST API (Sandbox).

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedrop/shared/models/teams_model.dart';
+import 'package:eagle_esports/shared/models/teams_model.dart';
 
 class TeamRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -21,8 +21,15 @@ class TeamRepository {
   }
 
   Future<List<TeamModel>> getTeamsForTournament(String tournamentId) async {
-    final snapshot = await _teams.where('tournamentId', isEqualTo: tournamentId).get();
-    return snapshot.docs.map((doc) => TeamModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)).toList();
+    final snapshot = await _teams
+        .where('tournamentId', isEqualTo: tournamentId)
+        .get();
+    return snapshot.docs
+        .map(
+          (doc) =>
+              TeamModel.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+        )
+        .toList();
   }
 
   Future<void> addMemberToTeam(String teamId, String userId) async {
@@ -32,12 +39,15 @@ class TeamRepository {
     });
   }
 
-  Future<TeamModel?> getUserTeamForTournament(String tournamentId, String userId) async {
+  Future<TeamModel?> getUserTeamForTournament(
+    String tournamentId,
+    String userId,
+  ) async {
     final snapshot = await _teams
         .where('tournamentId', isEqualTo: tournamentId)
         .where('members', arrayContains: userId)
         .get();
-        
+
     if (snapshot.docs.isNotEmpty) {
       final doc = snapshot.docs.first;
       return TeamModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
@@ -46,12 +56,13 @@ class TeamRepository {
   }
 
   Future<List<TeamModel>> getUserTeams(String userId) async {
-    final snapshot = await _teams
-        .where('members', arrayContains: userId)
-        .get();
-        
+    final snapshot = await _teams.where('members', arrayContains: userId).get();
+
     return snapshot.docs
-        .map((doc) => TeamModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
+        .map(
+          (doc) =>
+              TeamModel.fromMap(doc.data() as Map<String, dynamic>, doc.id),
+        )
         .toList();
   }
 
@@ -59,8 +70,15 @@ class TeamRepository {
     return _teams
         .where('members', arrayContains: userId)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => TeamModel.fromMap(doc.data() as Map<String, dynamic>, doc.id))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => TeamModel.fromMap(
+                  doc.data() as Map<String, dynamic>,
+                  doc.id,
+                ),
+              )
+              .toList(),
+        );
   }
 }

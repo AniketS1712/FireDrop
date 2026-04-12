@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
-import 'package:firedrop/shared/models/video_model.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
+import 'package:eagle_esports/shared/models/video_model.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final VideoModel video;

@@ -1,4 +1,4 @@
-import 'package:firedrop/core/constant/app_enums.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
 
 enum GameMode { solo, duo, squad }
 

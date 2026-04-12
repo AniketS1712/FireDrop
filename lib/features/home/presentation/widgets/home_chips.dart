@@ -1,5 +1,5 @@
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/features/tournament/presentation/providers/tournament_providers.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/features/tournament/presentation/providers/tournament_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -128,8 +128,8 @@ class _ChipItem extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.radius8),
         side: BorderSide(
-          color: selected ? Colors.transparent : colorScheme.outlineVariant,
-          width: 1.8,
+          color: selected ? colorScheme.onPrimary : colorScheme.onSecondary,
+          width: selected ? 1 : 1,
         ),
       ),
     );

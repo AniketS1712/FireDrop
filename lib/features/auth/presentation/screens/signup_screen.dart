@@ -1,16 +1,16 @@
-import 'package:firedrop/core/routes/route_names.dart';
-import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/features/auth/presentation/widgets/google_button.dart';
-import 'package:firedrop/shared/widgets/input_field.dart';
+import 'package:eagle_esports/core/routes/route_names.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
+import 'package:eagle_esports/features/auth/presentation/widgets/google_button.dart';
+import 'package:eagle_esports/shared/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
-import 'package:firedrop/features/auth/presentation/widgets/auth_button.dart';
-import 'package:firedrop/features/auth/presentation/widgets/auth_card.dart';
-import 'package:firedrop/features/auth/presentation/widgets/auth_layout.dart';
-import 'package:firedrop/features/auth/data/auth_service.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/features/auth/presentation/widgets/auth_button.dart';
+import 'package:eagle_esports/features/auth/presentation/widgets/auth_card.dart';
+import 'package:eagle_esports/features/auth/presentation/widgets/auth_layout.dart';
+import 'package:eagle_esports/features/auth/data/auth_service.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
-import 'package:firedrop/features/team/presentation/providers/team_providers.dart';
+import 'package:go_router/go_router.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/core/routes/route_names.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/features/team/presentation/providers/team_providers.dart';
 
 /// ─── Join Room Screen ──────────────────────────────────────────────────────
 /// Allows a user to join an existing team room using a 6-character invite code.
@@ -91,7 +93,10 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
         ),
       );
 
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      context.pushReplacementNamed(
+        RouteNames.myTeam,
+        extra: {'tournament': widget.tournament, 'team': team},
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -146,7 +151,7 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
           onPressed: _isLoading ? null : () => Navigator.pop(context),
         ),
         title: const Text(
-          'Join Room',
+          'Join Team',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,

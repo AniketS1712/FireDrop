@@ -1,5 +1,5 @@
-import 'package:firedrop/shared/models/users_model.dart';
-import 'package:firedrop/features/auth/data/auth_service.dart';
+import 'package:eagle_esports/shared/models/users_model.dart';
+import 'package:eagle_esports/features/auth/data/auth_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

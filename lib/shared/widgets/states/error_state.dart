@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
 
 class ErrorState extends StatelessWidget {
   final String message;

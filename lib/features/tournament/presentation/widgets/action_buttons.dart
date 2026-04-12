@@ -1,10 +1,10 @@
-import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/core/routes/route_names.dart';
-// import 'package:firedrop/core/theme/app_colors.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/features/tournament/presentation/widgets/action_btn.dart';
-import 'package:firedrop/features/tournament/presentation/widgets/registered_teams_sheet.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
+import 'package:eagle_esports/core/routes/route_names.dart';
+// import 'package:eagle_esports/core/theme/app_colors.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/features/tournament/presentation/widgets/action_btn.dart';
+import 'package:eagle_esports/features/tournament/presentation/widgets/registered_teams_sheet.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

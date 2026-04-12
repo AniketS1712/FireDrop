@@ -1,8 +1,8 @@
-import 'package:firedrop/core/routes/route_names.dart';
+import 'package:eagle_esports/core/routes/route_names.dart';
 import 'package:flutter/material.dart';
-// import 'package:firedrop/core/theme/app_colors.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
+// import 'package:eagle_esports/core/theme/app_colors.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/shared/models/tournaments_model.dart';
 import 'package:go_router/go_router.dart';
 
 class TeamSelectionScreen extends StatelessWidget {
@@ -63,7 +63,7 @@ class TeamSelectionScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.space48),
             _SelectionOptionCard(
-              title: 'Create Room',
+              title: 'Create Team',
               description: 'Form a new squad and invite your friends to join.',
               icon: Icons.add_circle_outline,
               accentColor: Theme.of(context).colorScheme.primary,
@@ -73,7 +73,7 @@ class TeamSelectionScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppSizes.space24),
             _SelectionOptionCard(
-              title: 'Join Room',
+              title: 'Join Team',
               description: 'Already have an invite? Enter the team code here.',
               icon: Icons.login_rounded,
               accentColor: Theme.of(context).colorScheme.secondary,

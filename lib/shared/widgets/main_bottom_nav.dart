@@ -1,6 +1,6 @@
 import 'dart:ui';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/shared/widgets/nav_item.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/shared/widgets/nav_item.dart';
 import 'package:flutter/material.dart';
 
 class MainBottomNav extends StatelessWidget {

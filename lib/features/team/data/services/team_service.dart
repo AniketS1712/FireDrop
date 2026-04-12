@@ -1,6 +1,6 @@
 import 'dart:math';
-import 'package:firedrop/shared/models/teams_model.dart';
-import 'package:firedrop/features/team/data/repositories/team_repository.dart';
+import 'package:eagle_esports/shared/models/teams_model.dart';
+import 'package:eagle_esports/features/team/data/repositories/team_repository.dart';
 
 class TeamService {
   final TeamRepository _repository;
@@ -22,20 +22,26 @@ class TeamService {
     required int maxSlots,
     required String ign,
   }) async {
-    final existingTeam = await _repository.getUserTeamForTournament(tournamentId, captainId);
+    final existingTeam = await _repository.getUserTeamForTournament(
+      tournamentId,
+      captainId,
+    );
     if (existingTeam != null) {
       throw Exception('You are already registered for this tournament.');
     }
 
     final currentTeams = await _repository.getTeamsForTournament(tournamentId);
     if (currentTeams.length >= maxSlots) {
-      throw Exception('This tournament is already full. No more teams can join.');
+      throw Exception(
+        'This tournament is already full. No more teams can join.',
+      );
     }
 
     // Generate code
     final code = _generateTeamCode();
-    
-    final String teamId = 'team_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(1000)}';
+
+    final String teamId =
+        'team_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(1000)}';
 
     final team = TeamModel(
       id: teamId,
@@ -57,15 +63,18 @@ class TeamService {
     required String tournamentId,
     required String code,
     required String userId,
-    required int maxMembers, 
+    required int maxMembers,
   }) async {
-    final existingTeam = await _repository.getUserTeamForTournament(tournamentId, userId);
+    final existingTeam = await _repository.getUserTeamForTournament(
+      tournamentId,
+      userId,
+    );
     if (existingTeam != null) {
       throw Exception('You are already registered for this tournament.');
     }
 
     final team = await _repository.getTeamByCode(code.trim().toUpperCase());
-    
+
     if (team == null) {
       throw Exception('Team not found for the provided code.');
     }
@@ -80,12 +89,13 @@ class TeamService {
 
     await _repository.addMemberToTeam(team.id, userId);
 
-    return team.copyWith(
-      members: [...team.members, userId],
-    );
+    return team.copyWith(members: [...team.members, userId]);
   }
 
-  Future<TeamModel?> getUserTeamForTournament(String tournamentId, String userId) async {
+  Future<TeamModel?> getUserTeamForTournament(
+    String tournamentId,
+    String userId,
+  ) async {
     return _repository.getUserTeamForTournament(tournamentId, userId);
   }
 

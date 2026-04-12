@@ -1,7 +1,7 @@
-import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/core/routes/app_routes.dart';
-import 'package:firedrop/core/routes/route_paths.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
+import 'package:eagle_esports/core/routes/app_routes.dart';
+import 'package:eagle_esports/core/routes/route_paths.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -50,7 +50,8 @@ String? _redirect(Ref ref, GoRouterState state) {
   final isOnLogin = path == RoutePaths.login;
   final isOnSignup = path == RoutePaths.signup;
   final isOnForgotPassword = path == RoutePaths.forgotPassword;
-  final isOnPublic = isOnSplash || isOnLogin || isOnSignup || isOnForgotPassword;
+  final isOnPublic =
+      isOnSplash || isOnLogin || isOnSignup || isOnForgotPassword;
 
   // ── Not logged in ──────────────────────────────────────────────────────────
   if (!isLoggedIn) {
@@ -64,6 +65,9 @@ String? _redirect(Ref ref, GoRouterState state) {
 
   // Redirect away from public routes to appropriate home
   if (isOnPublic) {
+    // If we're on the splash screen, don't auto-redirect yet.
+    // The splash screen manages its own minimum duration delay before pushing to /home.
+    if (isOnSplash) return null;
     return isOrganizer ? RoutePaths.organizerDashboard : RoutePaths.home;
   }
 

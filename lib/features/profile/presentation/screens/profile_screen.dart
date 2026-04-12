@@ -1,18 +1,17 @@
 import 'dart:io';
-import 'dart:ui';
-import 'package:firedrop/core/theme/app_colors.dart';
+import 'package:eagle_esports/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
-import 'package:firedrop/features/team/presentation/providers/team_providers.dart';
-import 'package:firedrop/features/tournament/presentation/providers/tournament_providers.dart';
-import 'package:firedrop/shared/models/tournaments_model.dart';
-import 'package:firedrop/shared/models/users_model.dart';
-import 'package:firedrop/features/video/data/repositories/upload_repository.dart';
-import 'package:go_router/go_router.dart';
-import 'package:firedrop/core/routes/route_names.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/features/team/presentation/providers/team_providers.dart';
+import 'package:eagle_esports/features/tournament/presentation/providers/tournament_providers.dart';
+import 'package:eagle_esports/shared/models/users_model.dart';
+import 'package:eagle_esports/features/video/data/repositories/upload_repository.dart';
+import '../widgets/profile_header.dart';
+import '../widgets/profile_stats_grid.dart';
+import '../widgets/profile_tournament_list.dart';
+import '../widgets/profile_menu_tiles.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -59,14 +58,73 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to update avatar: $e')),
+            SnackBar(
+              content: Text('Failed to update avatar: $e'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       } finally {
-        if (mounted) {
-          setState(() => _isUploading = false);
-        }
+        if (mounted) setState(() => _isUploading = false);
       }
+    }
+  }
+
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final colorScheme = Theme.of(ctx).colorScheme;
+        return AlertDialog(
+          backgroundColor: colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
+          ),
+          title: Text(
+            'LOG OUT',
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to end your session?',
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(
+                'CANCEL',
+                style: TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.error,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                'LOG OUT',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await ref.read(authServiceProvider).signOut();
     }
   }
 
@@ -74,959 +132,119 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   Widget build(BuildContext context) {
     final userAsync = ref.watch(currentUserProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final gradients = Theme.of(context).extension<AppGradients>()!;
+    final appGradient = Theme.of(context).extension<AppGradients>();
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: BoxDecoration(gradient: gradients.background),
-        child: userAsync.when(
-          loading: () => Center(
-            child: CircularProgressIndicator(color: colorScheme.primary),
+      backgroundColor: colorScheme.surface,
+      body: userAsync.when(
+        loading: () => Center(
+          child: CircularProgressIndicator(color: colorScheme.primary),
+        ),
+        error: (err, _) => Center(
+          child: Text(
+            'Error: $err',
+            style: TextStyle(color: colorScheme.error),
           ),
-          error: (err, _) => Center(
-            child: Text(
-              'Error loading profile: $err',
-              style: TextStyle(color: colorScheme.error),
-            ),
-          ),
-          data: (user) {
-            if (user == null) {
-              return Center(
-                child: Text(
-                  'Not logged in',
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-              );
-            }
+        ),
+        data: (user) {
+          if (user == null) {
+            return const Center(child: Text('Not logged in'));
+          }
 
-            final initials = user.name.isNotEmpty
-                ? user.name
-                      .trim()
-                      .split(' ')
-                      .take(2)
-                      .map((w) => w[0].toUpperCase())
-                      .join()
-                : 'U';
+          final joinedTeamsAsync = ref.watch(userJoinedTeamsProvider);
+          final publicAsync = ref.watch(publicTournamentsProvider);
 
-            return FadeTransition(
+          return Container(
+            decoration: BoxDecoration(gradient: appGradient?.background),
+            child: FadeTransition(
               opacity: _fadeAnim,
               child: CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: AppSizes.space48),
-                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 60)),
 
-                  // ── Profile Header ──
+                  // ── Header Section ──
                   SliverToBoxAdapter(
-                    child: _ProfileHeader(
+                    child: ProfileHeader(
                       user: user,
-                      initials: initials,
                       isUploading: _isUploading,
                       onPickImage: () => _pickAndUploadImage(user),
                     ),
                   ),
 
-                  // ── Player Stats ──
-                  SliverToBoxAdapter(child: _buildStats(context, ref)),
-
-                  // ── Recently Joined Tournaments ──
+                  // ── Stats Section ──
                   SliverToBoxAdapter(
-                    child: _buildRecentTournaments(context, ref),
+                    child: joinedTeamsAsync.when(
+                      data: (teams) =>
+                          ProfileStatsGrid(tournamentCount: teams.length),
+                      loading: () => const ProfileStatsGrid(tournamentCount: 0),
+                      error: (_, _) =>
+                          const ProfileStatsGrid(tournamentCount: 0),
+                    ),
                   ),
 
-                  // ── Settings & Support ──
+                  // ── Tournament List Section ──
                   SliverToBoxAdapter(
-                    child: const _SectionTitle(title: 'SETTINGS'),
+                    child: publicAsync.maybeWhen(
+                      data: (allTournaments) {
+                        return joinedTeamsAsync.maybeWhen(
+                          data: (teams) {
+                            final joinedIds = teams
+                                .map((t) => t.tournamentId)
+                                .toSet();
+                            final myTournaments =
+                                allTournaments
+                                    .where((t) => joinedIds.contains(t.id))
+                                    .toList()
+                                  ..sort(
+                                    (a, b) =>
+                                        b.createdAt.compareTo(a.createdAt),
+                                  );
+
+                            return ProfileTournamentList(
+                              tournaments: myTournaments.take(3).toList(),
+                              onViewAll: () {
+                                ref
+                                    .read(tournamentFilterProvider.notifier)
+                                    .setFilter(TournamentFilter.joined);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Showing joined tournaments in Home',
+                                    ),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          orElse: () => const SizedBox.shrink(),
+                        );
+                      },
+                      orElse: () => const SizedBox.shrink(),
+                    ),
                   ),
+
+                  // ── Menu Options Section ──
                   SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSizes.space16,
-                      ),
-                      child: Column(
-                        children: [
-                          _GlassActionTile(
-                            icon: Icons.settings_rounded,
-                            title: 'Settings',
-                            subtitle: 'App preferences and account details',
-                            accentColor: colorScheme.primary,
-                            onTap: () {},
-                          ),
-                          const SizedBox(height: AppSizes.space12),
-                          _GlassActionTile(
-                            icon: Icons.help_outline_rounded,
-                            title: 'Help & Support',
-                            subtitle: 'FAQ, guides and contact',
-                            accentColor: colorScheme.onSurfaceVariant,
-                            onTap: () {},
-                          ),
-                          const SizedBox(height: AppSizes.space12),
-                          _LogoutTile(
-                            onTap: () => _showLogoutDialog(context, ref),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStats(BuildContext context, WidgetRef ref) {
-    final joinedTeamsAsync = ref.watch(userJoinedTeamsProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.space16),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _GlassStatCard(
-                  icon: Icons.emoji_events_rounded,
-                  label: 'Total Wins',
-                  value: '0', // TODO: Implement wins
-                  accentColor: AppColorTokens.warning,
-                ),
-              ),
-              const SizedBox(width: AppSizes.space12),
-              Expanded(
-                child: _GlassStatCard(
-                  icon: Icons.sports_esports_rounded,
-                  label: 'Tournaments',
-                  value: joinedTeamsAsync.when(
-                    data: (teams) => teams.length.toString(),
-                    loading: () => '-',
-                    error: (_, _) => '0',
-                  ),
-                  accentColor: colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.space12),
-          Row(
-            children: [
-              Expanded(
-                child: _GlassStatCard(
-                  icon: Icons.account_balance_wallet_rounded,
-                  label: 'Total Earnings',
-                  value: '₹0', // TODO: Implement earnings
-                  accentColor: AppColorTokens.success,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.space24),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecentTournaments(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final joinedTeamsAsync = ref.watch(userJoinedTeamsProvider);
-    final publicAsync = ref.watch(publicTournamentsProvider);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSizes.space16,
-            0,
-            AppSizes.space16,
-            AppSizes.space8,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const _SectionTitle(
-                title: 'RECENTLY JOINED',
-                padding: EdgeInsets.zero,
-              ),
-              TextButton(
-                onPressed: () {
-                  ref
-                      .read(tournamentFilterProvider.notifier)
-                      .setFilter(TournamentFilter.joined);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Go to Home -> Joined Tab to view all'),
-                    ),
-                  );
-                },
-                child: Text(
-                  'View All',
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        joinedTeamsAsync.when(
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(AppSizes.space24),
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          error: (e, _) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.space16),
-            child: Text(
-              'Error loading tournaments: $e',
-              style: TextStyle(color: colorScheme.error),
-            ),
-          ),
-          data: (teams) {
-            if (teams.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.space16,
-                  vertical: AppSizes.space8,
-                ),
-                child: Text(
-                  'You haven\'t joined any tournaments yet.',
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-              );
-            }
-
-            return publicAsync.when(
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSizes.space24),
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              error: (e, _) => Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.space16,
-                ),
-                child: Text(
-                  'Error loading tournaments: $e',
-                  style: TextStyle(color: colorScheme.error),
-                ),
-              ),
-              data: (allTournaments) {
-                final joinedTournamentIds = teams
-                    .map((t) => t.tournamentId)
-                    .toSet();
-
-                final myTournaments = allTournaments
-                    .where((t) => joinedTournamentIds.contains(t.id))
-                    .toList();
-
-                myTournaments.sort(
-                  (a, b) => b.createdAt.compareTo(a.createdAt),
-                );
-
-                final recentThree = myTournaments.take(3).toList();
-
-                if (recentThree.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSizes.space16,
-                      vertical: AppSizes.space8,
-                    ),
-                    child: Text(
-                      'You haven\'t joined any tournaments yet.',
-                      style: TextStyle(color: colorScheme.onSurfaceVariant),
-                    ),
-                  );
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.space16,
-                  ),
-                  child: Column(
-                    children: recentThree
-                        .map((t) => _buildMiniTournamentCard(context, t))
-                        .toList(),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-        const SizedBox(height: AppSizes.space16),
-      ],
-    );
-  }
-
-  Widget _buildMiniTournamentCard(
-    BuildContext context,
-    TournamentModel tournament,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return GestureDetector(
-      onTap: () =>
-          context.pushNamed(RouteNames.tournamentDetail, extra: tournament),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: AppSizes.space12),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppSizes.radius16),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(
-              padding: const EdgeInsets.all(AppSizes.space12),
-              decoration: BoxDecoration(
-                color: colorScheme.onSurface.withAlpha(12),
-                borderRadius: BorderRadius.circular(AppSizes.radius16),
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withAlpha(50),
-                ),
-              ),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSizes.radius8),
-                    child: Image.network(
-                      tournament.imageUrl,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Container(
-                        width: 60,
-                        height: 60,
-                        color: colorScheme.primaryContainer,
-                        child: Icon(
-                          Icons.videogame_asset,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSizes.space16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          tournament.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${tournament.gameMode.name.toUpperCase()} • \$${tournament.entryFee}',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showLogoutDialog(BuildContext context, WidgetRef ref) async {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: colorScheme.surfaceContainerHighest,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSizes.radius16),
-        ),
-        title: Text(
-          'Log Out',
-          style: textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to log out?',
-          style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              'CANCEL',
-              style: textTheme.labelLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.error,
-              foregroundColor: colorScheme.onError,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radius8),
-              ),
-            ),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              'LOG OUT',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldLogout == true) {
-      await ref.read(authServiceProvider).signOut();
-    }
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════════════════
-// PROFILE HEADER
-// ════════════════════════════════════════════════════════════════════════════════
-
-class _ProfileHeader extends StatelessWidget {
-  final UserModel user;
-  final String initials;
-  final bool isUploading;
-  final VoidCallback onPickImage;
-
-  const _ProfileHeader({
-    required this.user,
-    required this.initials,
-    required this.isUploading,
-    required this.onPickImage,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.space16),
-      child: Column(
-        children: [
-          // ── Avatar with glow ──
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // Outer glow ring
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withAlpha(60),
-                      blurRadius: 32,
-                      spreadRadius: 8,
-                    ),
-                    BoxShadow(
-                      color: colorScheme.secondary.withAlpha(30),
-                      blurRadius: 48,
-                      spreadRadius: 12,
-                    ),
-                  ],
-                ),
-              ),
-              // Avatar
-              Container(
-                width: 110,
-                height: 110,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [colorScheme.primary, colorScheme.secondary],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  border: Border.all(
-                    color: colorScheme.primary.withAlpha(100),
-                    width: 3,
-                  ),
-                ),
-                child: isUploading
-                    ? const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      )
-                    : user.avatarUrl.isNotEmpty
-                    ? ClipOval(
-                        child: Image.network(
-                          user.avatarUrl,
-                          fit: BoxFit.cover,
-                          width: 110,
-                          height: 110,
-                          errorBuilder: (_, _, _) => Center(
-                            child: Text(
-                              initials,
-                              style: TextStyle(
-                                color: colorScheme.onPrimary,
-                                fontSize: 40,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 2,
-                              ),
+                    child: ProfileMenuTiles(
+                      onSettingsTap: () =>
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Settings feature coming soon!'),
+                              behavior: SnackBarBehavior.floating,
                             ),
                           ),
-                        ),
-                      )
-                    : Center(
-                        child: Text(
-                          initials,
-                          style: TextStyle(
-                            color: colorScheme.onPrimary,
-                            fontSize: 40,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                      ),
-              ),
-              // Camera button
-              Positioned(
-                bottom: 4,
-                right: 0,
-                left: 76,
-                child: GestureDetector(
-                  onTap: isUploading ? null : onPickImage,
-                  child: Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: colorScheme.surface, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colorScheme.primary.withAlpha(80),
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.camera_alt_rounded,
-                      color: colorScheme.onPrimary,
-                      size: 16,
+                      onLogoutTap: _logout,
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSizes.space24),
 
-          // ── Name ──
-          Text(
-            user.name,
-            style: textTheme.headlineMedium?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSizes.space8),
-
-          // ── Email ──
-          Text(
-            user.email,
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSizes.space16),
-
-          // ── Role badge ──
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  colorScheme.primary.withAlpha(30),
-                  colorScheme.secondary.withAlpha(30),
+                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
                 ],
               ),
-              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-              border: Border.all(color: colorScheme.primary.withAlpha(60)),
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.primary.withAlpha(20),
-                  blurRadius: 12,
-                  spreadRadius: 2,
-                ),
-              ],
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.verified_user_rounded,
-                  color: colorScheme.primary,
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  (user.role.name == "player" ? "Gamer" : user.role.name)
-                      .toUpperCase(),
-                  style: textTheme.labelSmall?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.8,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSizes.space8),
-
-          // ── Member since ──
-          Text(
-            'Member since ${_formatDate(user.createdAt)}',
-            style: textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant.withAlpha(160),
-            ),
-          ),
-          const SizedBox(height: AppSizes.space24),
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[date.month - 1]} ${date.year}';
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════════════════
-// GLASS STAT CARD
-// ════════════════════════════════════════════════════════════════════════════════
-
-class _GlassStatCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color accentColor;
-
-  const _GlassStatCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.accentColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppSizes.radius16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          padding: const EdgeInsets.all(AppSizes.space16),
-          decoration: BoxDecoration(
-            color: colorScheme.onSurface.withAlpha(12),
-            borderRadius: BorderRadius.circular(AppSizes.radius16),
-            border: Border.all(color: accentColor.withAlpha(50), width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: accentColor.withAlpha(15),
-                blurRadius: 16,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: accentColor.withAlpha(25),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: accentColor,
-                      size: 18,
-                      shadows: [Shadow(color: accentColor, blurRadius: 8)],
-                    ),
-                  ),
-                  const Spacer(),
-                ],
-              ),
-              const SizedBox(height: AppSizes.space12),
-              Text(
-                value,
-                style: textTheme.headlineLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w900,
-                  shadows: [
-                    Shadow(color: accentColor.withAlpha(80), blurRadius: 12),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════════════════
-// SECTION TITLE
-// ════════════════════════════════════════════════════════════════════════════════
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  final EdgeInsetsGeometry? padding;
-
-  const _SectionTitle({required this.title, this.padding});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding:
-          padding ??
-          const EdgeInsets.fromLTRB(
-            AppSizes.space16,
-            AppSizes.space8,
-            AppSizes.space16,
-            AppSizes.space16,
-          ),
-      child: Text(
-        title,
-        style: textTheme.labelLarge?.copyWith(
-          color: colorScheme.onSurfaceVariant,
-          letterSpacing: 1.5,
-        ),
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════════════════
-// GLASS ACTION TILE
-// ════════════════════════════════════════════════════════════════════════════════
-
-class _GlassActionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color accentColor;
-  final VoidCallback onTap;
-
-  const _GlassActionTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.accentColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSizes.radius16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            padding: const EdgeInsets.all(AppSizes.space16),
-            decoration: BoxDecoration(
-              color: colorScheme.onSurface.withAlpha(10),
-              borderRadius: BorderRadius.circular(AppSizes.radius16),
-              border: Border.all(color: accentColor.withAlpha(30)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: accentColor.withAlpha(20),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: accentColor,
-                    size: 22,
-                    shadows: [Shadow(color: accentColor, blurRadius: 8)],
-                  ),
-                ),
-                const SizedBox(width: AppSizes.space16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: textTheme.titleSmall?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                  size: 22,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ════════════════════════════════════════════════════════════════════════════════
-// LOGOUT TILE
-// ════════════════════════════════════════════════════════════════════════════════
-
-class _LogoutTile extends StatelessWidget {
-  final VoidCallback onTap;
-  const _LogoutTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSizes.radius16),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-          child: Container(
-            padding: const EdgeInsets.all(AppSizes.space16),
-            decoration: BoxDecoration(
-              color: colorScheme.error.withAlpha(10),
-              borderRadius: BorderRadius.circular(AppSizes.radius16),
-              border: Border.all(color: colorScheme.error.withAlpha(40)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: colorScheme.error.withAlpha(20),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.logout_rounded,
-                    color: colorScheme.error,
-                    size: 22,
-                    shadows: [Shadow(color: colorScheme.error, blurRadius: 8)],
-                  ),
-                ),
-                const SizedBox(width: AppSizes.space16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Log Out',
-                        style: textTheme.titleSmall?.copyWith(
-                          color: colorScheme.error,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Sign out of your account',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.error.withAlpha(160),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: colorScheme.error.withAlpha(160),
-                  size: 22,
-                ),
-              ],
-            ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

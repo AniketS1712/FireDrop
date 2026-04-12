@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'package:flutter_cashfree_pg_sdk/utils/cfenums.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
 import 'package:flutter_cashfree_pg_sdk/api/cferrorresponse/cferrorresponse.dart';
 import 'package:flutter_cashfree_pg_sdk/api/cfpaymentgateway/cfpaymentgatewayservice.dart';
 import 'package:flutter_cashfree_pg_sdk/api/cfsession/cfsession.dart';
 import 'package:flutter_cashfree_pg_sdk/api/cfpayment/cfwebcheckoutpayment.dart';
-import 'package:firedrop/core/constant/cashfree_config.dart';
-import 'package:firedrop/shared/models/payment_model.dart';
-import 'package:firedrop/features/payment/data/repositories/payment_repository.dart';
+import 'package:eagle_esports/core/constant/cashfree_config.dart';
+import 'package:eagle_esports/shared/models/payment_model.dart';
+import 'package:eagle_esports/features/payment/data/repositories/payment_repository.dart';
 import 'package:uuid/uuid.dart';
 
 /// ─── Cashfree Payment Service ──────────────────────────────────────────────
@@ -32,6 +31,7 @@ import 'package:uuid/uuid.dart';
 ///   - Platform-unsupported fallback (web/desktop)
 class CashfreeService {
   final PaymentRepository _repository;
+  // Use CFPaymentGatewayService instance for persistent callbacks
   final CFPaymentGatewayService _cfService = CFPaymentGatewayService();
 
   /// Callbacks that the UI layer can set.
@@ -54,18 +54,15 @@ class CashfreeService {
   ///   - If empty, it calls Cashfree API directly (DEV ONLY)
   Future<Map<String, dynamic>> _createOrder({
     required String orderId,
-    required int amountInPaise,
+    required int amountInRupees,
     required String customerName,
     required String customerEmail,
     required String customerPhone,
     required String customerId,
   }) async {
-    // Convert paise to rupees for API (Cashfree expects amount in rupees)
-    final amountInRupees = (amountInPaise / 100).toStringAsFixed(2);
-
     final orderData = {
       'order_id': orderId,
-      'order_amount': double.parse(amountInRupees),
+      'order_amount': amountInRupees.toDouble(),
       'order_currency': CashfreeConfig.currency,
       'customer_details': {
         'customer_id': customerId,
@@ -97,12 +94,6 @@ class CashfreeService {
               ),
             );
       } else {
-        // ── Direct API call (DEV/TESTING ONLY) ───────────────────────
-        debugPrint(
-          '⚠️ [CashfreeService] Creating order directly via API. '
-          'Move this to a backend in production!',
-        );
-
         response = await http
             .post(
               Uri.parse('${CashfreeConfig.baseUrl}/orders'),
@@ -124,7 +115,8 @@ class CashfreeService {
       }
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body) as Map<String, dynamic>;
+        final body = jsonDecode(response.body) as Map<String, dynamic>;
+        return body;
       } else {
         final errorBody = jsonDecode(response.body);
         final message = errorBody['message'] ?? 'Failed to create order';
@@ -216,7 +208,7 @@ class CashfreeService {
     required String userEmail,
     required String userPhone,
     required String tournamentId,
-    required int entryFeeInPaise,
+    required int entryFeeInRupees,
     required String paymentType, // 'create_room' or 'join_room'
   }) async {
     // ── Step 1: Check for duplicate/existing payment ──────────────────
@@ -227,47 +219,40 @@ class CashfreeService {
 
     if (existingPayment != null) {
       if (existingPayment.isSuccessful) {
-        // Already paid — return existing payment
-        debugPrint(
-          '[CashfreeService] User already has a successful payment '
-          'for this tournament. Skipping.',
-        );
         return existingPayment;
       }
 
       if (existingPayment.isInProgress) {
-        // Has a pending payment — try to verify it first
-        debugPrint(
-          '[CashfreeService] Found in-progress payment. '
-          'Attempting verification...',
-        );
         try {
           final verified = await _verifyAndUpdate(existingPayment);
           if (verified.isSuccessful) return verified;
           // If verification shows it failed, allow a new payment
-        } catch (_) {
-          // Verification failed, mark old one as expired and proceed
-          await _repository.updatePaymentStatus(
-            existingPayment.id,
-            PaymentStatus.expired,
-            statusMessage: 'Superseded by new payment attempt',
-          );
-        }
+        } catch (e) {}
       }
+
+      // Expire any non-successful existing payment so it doesn't block
+      // the new payment attempt
+      await _repository.updatePaymentStatus(
+        existingPayment.id,
+        PaymentStatus.expired,
+        statusMessage: 'Superseded by new payment attempt',
+      );
     }
 
     // ── Step 2: Clean up stale payments ──────────────────────────────
     await _repository.expireStalePayments(userId);
 
     // ── Step 3: Generate unique order ID ─────────────────────────────
-    final orderId =
-        'FD_${tournamentId.substring(0, 8)}_${DateTime.now().millisecondsSinceEpoch}';
+    final idPrefix = tournamentId.length >= 8
+        ? tournamentId.substring(0, 8)
+        : tournamentId;
+    final orderId = 'FD_${idPrefix}_${DateTime.now().millisecondsSinceEpoch}';
     final paymentId = const Uuid().v4();
 
     // ── Step 4: Create Cashfree order ────────────────────────────────
     final orderResponse = await _createOrder(
       orderId: orderId,
-      amountInPaise: entryFeeInPaise,
+      amountInRupees: entryFeeInRupees,
       customerName: userName,
       customerEmail: userEmail,
       customerPhone: userPhone.isEmpty ? '9999999999' : userPhone,
@@ -292,7 +277,7 @@ class CashfreeService {
       cfOrderId: cfOrderId,
       userId: userId,
       tournamentId: tournamentId,
-      amount: entryFeeInPaise,
+      amount: entryFeeInRupees,
       currency: CashfreeConfig.currency,
       status: PaymentStatus.created,
       paymentType: paymentType,
@@ -319,9 +304,6 @@ class CashfreeService {
     _cfService.setCallback(
       // ── onVerify: Called when SDK thinks payment succeeded ──────
       (String orderId) async {
-        debugPrint(
-          '[CashfreeService] Payment callback: verifyPayment($orderId)',
-        );
         try {
           final verified = await _verifyAndUpdate(payment);
           onPaymentSuccess?.call(verified);
@@ -344,9 +326,6 @@ class CashfreeService {
       (CFErrorResponse errorResponse, String orderId) async {
         final errorMessage =
             errorResponse.getMessage() ?? 'Payment failed. Please try again.';
-        debugPrint(
-          '[CashfreeService] Payment error: $errorMessage for order $orderId',
-        );
 
         await _repository.updatePaymentStatus(
           payment.id,
@@ -365,7 +344,7 @@ class CashfreeService {
     );
   }
 
-  /// Opens the Cashfree web checkout.
+  /// Opens the Cashfree checkout.
   Future<void> _openCheckout(String orderId, String paymentSessionId) async {
     try {
       final environment = CashfreeConfig.isSandbox
@@ -382,6 +361,9 @@ class CashfreeService {
           .setSession(session)
           .build();
 
+      // Final assurance for native view context: Use a small frame delay
+      // to ensure things are stabilized.
+      await Future.delayed(const Duration(milliseconds: 100));
       _cfService.doPayment(cfWebCheckout);
     } catch (e) {
       throw CashfreePaymentException(

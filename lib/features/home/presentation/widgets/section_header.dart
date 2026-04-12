@@ -1,4 +1,4 @@
-import 'package:firedrop/core/theme/app_sizes.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
 import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -59,11 +59,11 @@ class SectionHeader extends StatelessWidget {
               ),
             ],
           ),
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: colorScheme.onSurfaceVariant,
-            size: AppSizes.iconMd,
-            fontWeight: FontWeight.w900,
+          Image.asset(
+            'assets/images/free_fire_logo.png',
+            width: AppSizes.iconXl,
+            height: AppSizes.iconXl,
+            color: colorScheme.onSurface,
           ),
         ],
       ),

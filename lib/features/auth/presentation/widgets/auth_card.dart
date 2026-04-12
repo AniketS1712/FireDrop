@@ -1,5 +1,5 @@
-import 'package:firedrop/core/theme/app_colors.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
+import 'package:eagle_esports/core/theme/app_colors.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
 import 'package:flutter/material.dart';
 
 class AuthCard extends StatelessWidget {

@@ -3,12 +3,12 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firedrop/core/theme/app_colors.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
-import 'package:firedrop/features/tournament/presentation/providers/tournament_providers.dart';
-import 'package:firedrop/shared/models/users_model.dart';
-import 'package:firedrop/features/video/data/repositories/upload_repository.dart';
+import 'package:eagle_esports/core/theme/app_colors.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/features/tournament/presentation/providers/tournament_providers.dart';
+import 'package:eagle_esports/shared/models/users_model.dart';
+import 'package:eagle_esports/features/video/data/repositories/upload_repository.dart';
 
 class OrganizerProfileScreen extends ConsumerStatefulWidget {
   const OrganizerProfileScreen({super.key});
@@ -18,8 +18,7 @@ class OrganizerProfileScreen extends ConsumerStatefulWidget {
       _OrganizerProfileScreenState();
 }
 
-class _OrganizerProfileScreenState
-    extends ConsumerState<OrganizerProfileScreen>
+class _OrganizerProfileScreenState extends ConsumerState<OrganizerProfileScreen>
     with SingleTickerProviderStateMixin {
   bool _isUploading = false;
   late final AnimationController _fadeCtrl;
@@ -99,16 +98,17 @@ class _OrganizerProfileScreenState
             }
 
             final uid = user.uid;
-            final tournamentsAsync =
-                ref.watch(organizerTournamentsProvider(uid));
+            final tournamentsAsync = ref.watch(
+              organizerTournamentsProvider(uid),
+            );
 
             final initials = user.name.isNotEmpty
                 ? user.name
-                    .trim()
-                    .split(' ')
-                    .take(2)
-                    .map((w) => w[0].toUpperCase())
-                    .join()
+                      .trim()
+                      .split(' ')
+                      .take(2)
+                      .map((w) => w[0].toUpperCase())
+                      .join()
                 : 'O';
 
             return FadeTransition(
@@ -141,12 +141,13 @@ class _OrganizerProfileScreenState
                       error: (_, _) => const SizedBox.shrink(),
                       data: (tournaments) {
                         final total = tournaments.length;
-                        final live =
-                            tournaments.where((t) => t.isLive).length;
-                        final upcoming =
-                            tournaments.where((t) => t.isUpcoming).length;
-                        final completed =
-                            tournaments.where((t) => t.isCompleted).length;
+                        final live = tournaments.where((t) => t.isLive).length;
+                        final upcoming = tournaments
+                            .where((t) => t.isUpcoming)
+                            .length;
+                        final completed = tournaments
+                            .where((t) => t.isCompleted)
+                            .length;
 
                         return _OrganizerStatsSection(
                           totalTournaments: total,
@@ -206,9 +207,7 @@ class _OrganizerProfileScreenState
                   ),
 
                   // ── Account section ──
-                  SliverToBoxAdapter(
-                    child: _SectionTitle(title: 'ACCOUNT'),
-                  ),
+                  SliverToBoxAdapter(child: _SectionTitle(title: 'ACCOUNT')),
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -241,9 +240,7 @@ class _OrganizerProfileScreenState
                   ),
 
                   // ── Bottom padding ──
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 120),
-                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
                 ],
               ),
             );
@@ -380,30 +377,16 @@ class _ProfileHeader extends StatelessWidget {
                 ),
                 child: isUploading
                     ? const Center(
-                        child:
-                            CircularProgressIndicator(color: Colors.white),
+                        child: CircularProgressIndicator(color: Colors.white),
                       )
                     : user.avatarUrl.isNotEmpty
-                        ? ClipOval(
-                            child: Image.network(
-                              user.avatarUrl,
-                              fit: BoxFit.cover,
-                              width: 110,
-                              height: 110,
-                              errorBuilder: (_, _, _) => Center(
-                                child: Text(
-                                  initials,
-                                  style: TextStyle(
-                                    color: colorScheme.onPrimary,
-                                    fontSize: 40,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        : Center(
+                    ? ClipOval(
+                        child: Image.network(
+                          user.avatarUrl,
+                          fit: BoxFit.cover,
+                          width: 110,
+                          height: 110,
+                          errorBuilder: (_, _, _) => Center(
                             child: Text(
                               initials,
                               style: TextStyle(
@@ -414,6 +397,19 @@ class _ProfileHeader extends StatelessWidget {
                               ),
                             ),
                           ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          initials,
+                          style: TextStyle(
+                            color: colorScheme.onPrimary,
+                            fontSize: 40,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                      ),
               ),
               // Camera button
               Positioned(
@@ -428,8 +424,7 @@ class _ProfileHeader extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: colorScheme.primary,
                       shape: BoxShape.circle,
-                      border:
-                          Border.all(color: colorScheme.surface, width: 3),
+                      border: Border.all(color: colorScheme.surface, width: 3),
                       boxShadow: [
                         BoxShadow(
                           color: colorScheme.primary.withAlpha(80),
@@ -474,10 +469,7 @@ class _ProfileHeader extends StatelessWidget {
 
           // ── Role badge ──
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 8,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -486,9 +478,7 @@ class _ProfileHeader extends StatelessWidget {
                 ],
               ),
               borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-              border: Border.all(
-                color: colorScheme.primary.withAlpha(60),
-              ),
+              border: Border.all(color: colorScheme.primary.withAlpha(60)),
               boxShadow: [
                 BoxShadow(
                   color: colorScheme.primary.withAlpha(20),
@@ -534,8 +524,18 @@ class _ProfileHeader extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.year}';
   }
@@ -649,10 +649,7 @@ class _GlassStatCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.onSurface.withAlpha(12),
             borderRadius: BorderRadius.circular(AppSizes.radius16),
-            border: Border.all(
-              color: accentColor.withAlpha(50),
-              width: 1.5,
-            ),
+            border: Border.all(color: accentColor.withAlpha(50), width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: accentColor.withAlpha(15),
@@ -676,9 +673,7 @@ class _GlassStatCard extends StatelessWidget {
                       icon,
                       color: accentColor,
                       size: 18,
-                      shadows: [
-                        Shadow(color: accentColor, blurRadius: 8),
-                      ],
+                      shadows: [Shadow(color: accentColor, blurRadius: 8)],
                     ),
                   ),
                   const Spacer(),
@@ -691,10 +686,7 @@ class _GlassStatCard extends StatelessWidget {
                   color: colorScheme.onSurface,
                   fontWeight: FontWeight.w900,
                   shadows: [
-                    Shadow(
-                      color: accentColor.withAlpha(80),
-                      blurRadius: 12,
-                    ),
+                    Shadow(color: accentColor.withAlpha(80), blurRadius: 12),
                   ],
                 ),
               ),
@@ -780,9 +772,7 @@ class _GlassActionTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.onSurface.withAlpha(10),
               borderRadius: BorderRadius.circular(AppSizes.radius16),
-              border: Border.all(
-                color: accentColor.withAlpha(30),
-              ),
+              border: Border.all(color: accentColor.withAlpha(30)),
             ),
             child: Row(
               children: [
@@ -796,9 +786,7 @@ class _GlassActionTile extends StatelessWidget {
                     icon,
                     color: accentColor,
                     size: 22,
-                    shadows: [
-                      Shadow(color: accentColor, blurRadius: 8),
-                    ],
+                    shadows: [Shadow(color: accentColor, blurRadius: 8)],
                   ),
                 ),
                 const SizedBox(width: AppSizes.space16),
@@ -861,9 +849,7 @@ class _LogoutTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.error.withAlpha(10),
               borderRadius: BorderRadius.circular(AppSizes.radius16),
-              border: Border.all(
-                color: colorScheme.error.withAlpha(40),
-              ),
+              border: Border.all(color: colorScheme.error.withAlpha(40)),
             ),
             child: Row(
               children: [
@@ -877,12 +863,7 @@ class _LogoutTile extends StatelessWidget {
                     Icons.logout_rounded,
                     color: colorScheme.error,
                     size: 22,
-                    shadows: [
-                      Shadow(
-                        color: colorScheme.error,
-                        blurRadius: 8,
-                      ),
-                    ],
+                    shadows: [Shadow(color: colorScheme.error, blurRadius: 8)],
                   ),
                 ),
                 const SizedBox(width: AppSizes.space16),

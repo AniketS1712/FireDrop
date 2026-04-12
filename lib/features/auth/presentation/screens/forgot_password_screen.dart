@@ -1,9 +1,9 @@
-import 'package:firedrop/core/theme/app_sizes.dart';
-import 'package:firedrop/features/auth/presentation/providers/auth_providers.dart';
-import 'package:firedrop/features/auth/presentation/widgets/auth_button.dart';
-import 'package:firedrop/features/auth/presentation/widgets/auth_card.dart';
-import 'package:firedrop/features/auth/presentation/widgets/auth_layout.dart';
-import 'package:firedrop/shared/widgets/input_field.dart';
+import 'package:eagle_esports/core/theme/app_sizes.dart';
+import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/features/auth/presentation/widgets/auth_button.dart';
+import 'package:eagle_esports/features/auth/presentation/widgets/auth_card.dart';
+import 'package:eagle_esports/features/auth/presentation/widgets/auth_layout.dart';
+import 'package:eagle_esports/shared/widgets/input_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

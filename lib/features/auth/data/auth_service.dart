@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/shared/models/users_model.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
+import 'package:eagle_esports/shared/models/users_model.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
 
@@ -116,8 +116,8 @@ class AuthService {
   /// profile on first sign-in).
   Future<UserModel> signInWithGoogle() async {
     // Shows the native Google account picker
-    final GoogleSignInAccount googleUser =
-        await GoogleSignIn.instance.authenticate();
+    final GoogleSignInAccount googleUser = await GoogleSignIn.instance
+        .authenticate();
 
     // v7 only surfaces an idToken (no accessToken in `authentication`)
     final idToken = googleUser.authentication.idToken;
@@ -168,12 +168,11 @@ class AuthService {
 
   /// Throws [GamerTagTakenException] if [name] is already used by another user.
   Future<void> _assertGamerTagAvailable(String name) async {
-    final query =
-        await _firestore
-            .collection('users')
-            .where('name', isEqualTo: name.trim())
-            .limit(1)
-            .get();
+    final query = await _firestore
+        .collection('users')
+        .where('name', isEqualTo: name.trim())
+        .limit(1)
+        .get();
 
     if (query.docs.isNotEmpty) {
       throw GamerTagTakenException(name);
@@ -185,12 +184,11 @@ class AuthService {
     String candidate = base.trim();
 
     for (int i = 1; i <= 9999; i++) {
-      final query =
-          await _firestore
-              .collection('users')
-              .where('name', isEqualTo: candidate)
-              .limit(1)
-              .get();
+      final query = await _firestore
+          .collection('users')
+          .where('name', isEqualTo: candidate)
+          .limit(1)
+          .get();
 
       if (query.docs.isEmpty) return candidate;
       candidate = '${base.trim()}$i';

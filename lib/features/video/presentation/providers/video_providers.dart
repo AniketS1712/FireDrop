@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firedrop/shared/models/video_model.dart';
-import 'package:firedrop/features/video/data/repositories/video_repository.dart';
-import 'package:firedrop/features/video/data/services/video_service.dart';
+import 'package:eagle_esports/shared/models/video_model.dart';
+import 'package:eagle_esports/features/video/data/repositories/video_repository.dart';
+import 'package:eagle_esports/features/video/data/services/video_service.dart';
 
 final videoRepositoryProvider = Provider<VideoRepository>((ref) {
   return VideoRepository();

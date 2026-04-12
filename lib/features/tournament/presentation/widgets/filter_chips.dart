@@ -1,5 +1,4 @@
-import 'package:firedrop/core/constant/app_enums.dart';
-import 'package:firedrop/core/theme/app_sizes.dart';
+import 'package:eagle_esports/core/constant/app_enums.dart';
 import 'package:flutter/material.dart';
 
 class FilterChips extends StatelessWidget {
@@ -22,36 +21,49 @@ class FilterChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final textScheme = theme.textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSizes.space16),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSizes.space16),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        physics: const BouncingScrollPhysics(),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: _filters.entries.map((e) {
             final isSelected = selected == e.value;
-            return GestureDetector(
-              onTap: () => onChanged(e.value),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.space24,
-                  vertical: AppSizes.space8,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected ? colorScheme.primary : colorScheme.surface,
-                  borderRadius: BorderRadius.circular(AppSizes.radius8),
-                  border: Border.all(color: colorScheme.outline),
-                ),
-                child: Text(
-                  e.key,
-                  style: textScheme.titleSmall?.copyWith(
-                    color: isSelected
-                        ? colorScheme.onPrimary
-                        : colorScheme.onSurface,
-                    fontWeight: FontWeight.w800,
+            return Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: GestureDetector(
+                onTap: () => onChanged(e.value),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected ? colorScheme.primary : colorScheme.surfaceContainerHighest.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(
+                      color: isSelected ? colorScheme.primary : colorScheme.outline.withValues(alpha: 0.2),
+                      width: 1.5,
+                    ),
+                    boxShadow: isSelected ? [
+                      BoxShadow(
+                        color: colorScheme.primary.withValues(alpha: 0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ] : null,
+                  ),
+                  child: Text(
+                    e.key.toUpperCase(),
+                    style: TextStyle(
+                      color: isSelected ? Colors.black : colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                 ),
               ),
