@@ -57,12 +57,9 @@ class MatchCard extends ConsumerWidget {
         margin: const EdgeInsets.only(bottom: AppSizes.space24),
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest.withAlpha(50),
+          color: colorScheme.surface.withAlpha(50),
           borderRadius: BorderRadius.circular(AppSizes.radius24),
-          border: Border.all(
-            color: colorScheme.outline.withAlpha(80),
-            width: 1.5,
-          ),
+          border: Border.all(color: colorScheme.outline, width: 1.5),
           boxShadow: [
             BoxShadow(
               color: colorScheme.shadow.withAlpha(40),

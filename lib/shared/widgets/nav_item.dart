@@ -65,10 +65,7 @@ class NavItem extends StatelessWidget {
                 shadows: isSelected
                     ? [
                         Shadow(color: activeColor, blurRadius: 12),
-                        Shadow(
-                          color: activeColor.withAlpha(100),
-                          blurRadius: 24,
-                        ),
+                        Shadow(color: colorScheme.onPrimary, blurRadius: 24),
                       ]
                     : null,
               ),
@@ -88,7 +85,10 @@ class NavItem extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                             shadows: [
-                              Shadow(color: activeColor, blurRadius: 10),
+                              Shadow(
+                                color: colorScheme.onPrimary,
+                                blurRadius: 10,
+                              ),
                             ],
                           ),
                           maxLines: 1,

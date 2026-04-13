@@ -7,8 +7,8 @@ class AppColorTokens {
   static const primaryLight = Color(0xFF80F2FF);
   static const primaryDark = Color(0xFF005461);
 
-  static const secondary = Color(0xFF9D00FF);
-  static const secondaryLight = Color(0xFFCE80FF);
+  static const secondary = Color(0xFFFFFDDF);
+  static const secondaryLight = Color(0xFFFFFEF3);
   static const secondaryDark = Color(0xFF200034);
 
   static const bgPrimary = Color(0xFF000000);

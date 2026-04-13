@@ -122,7 +122,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         AppSizes.space16,
                         0,
                       ),
-                      child: HomeHeader(username: name),
+                      child: HomeHeader(
+                        username: name,
+                        onNotifications: () => context.pushNamed(RouteNames.notifications),
+                      ),
                     ),
                   ),
 

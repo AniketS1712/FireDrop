@@ -254,7 +254,7 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
                         : const Text(
                             'JOIN TEAM',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.black,
                               fontSize: 16,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 1.5,

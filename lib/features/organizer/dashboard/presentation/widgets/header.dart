@@ -65,6 +65,21 @@ class DashboardHeader extends ConsumerWidget {
               onPressed: () => context.pushNamed(RouteNames.videos),
             ),
           ),
+          const SizedBox(width: AppSizes.space12),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppSizes.radiusFull),
+              border: Border.all(color: colorsScheme.primary, width: 0.3),
+              color: colorsScheme.primary.withAlpha(30),
+            ),
+            child: IconButton(
+              icon: Icon(
+                Icons.notifications_none_rounded,
+                color: colorsScheme.onSecondary,
+              ),
+              onPressed: () => context.pushNamed(RouteNames.notifications),
+            ),
+          ),
         ],
       ),
     );

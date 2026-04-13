@@ -20,4 +20,5 @@ class RoutePaths {
   static const videoPlayer = '/videoPlayer';
   static const profile = '/profile';
   static const myTeam = '/my-team';
+  static const notifications = '/notifications';
 }

@@ -1,4 +1,5 @@
 import 'package:eagle_esports/features/organizer/dashboard/presentation/screens/tournament_sheet.dart';
+import 'package:eagle_esports/features/notification/presentation/screens/notification_screen.dart';
 import 'package:eagle_esports/features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:eagle_esports/features/profile/presentation/screens/profile_screen.dart';
 import 'package:eagle_esports/features/room_creation/presentation/screens/create_room_screen.dart';
@@ -124,6 +125,11 @@ class AppRoutes {
           team: data['team'] as TeamModel,
         );
       },
+    ),
+    GoRoute(
+      path: RoutePaths.notifications,
+      name: RouteNames.notifications,
+      builder: (context, state) => const NotificationScreen(),
     ),
   ];
 }

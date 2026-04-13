@@ -9,6 +9,7 @@ class UserModel {
   final UserRole role;
   final String avatarUrl;
   final bool isBanned;
+  final String? fcmToken;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -20,6 +21,7 @@ class UserModel {
     required this.role,
     required this.avatarUrl,
     required this.isBanned,
+    this.fcmToken,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -32,6 +34,7 @@ class UserModel {
     String? gameUid,
     String? avatarUrl,
     bool? isBanned,
+    String? fcmToken,
   }) {
     return UserModel(
       uid: uid,
@@ -43,6 +46,7 @@ class UserModel {
           : this.role,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       isBanned: isBanned ?? this.isBanned,
+      fcmToken: fcmToken ?? this.fcmToken,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -57,6 +61,7 @@ class UserModel {
       role: UserRole.values.byName(map['role']),
       avatarUrl: map['avatarUrl'],
       isBanned: map['isBanned'] ?? false,
+      fcmToken: map['fcmToken'],
       createdAt: (map['createdAt'] as Timestamp).toDate(),
       updatedAt: (map['updatedAt'] as Timestamp).toDate(),
     );
@@ -69,6 +74,7 @@ class UserModel {
     'role': role.name,
     'avatarUrl': avatarUrl,
     'isBanned': isBanned,
+    'fcmToken': fcmToken,
     'createdAt': Timestamp.fromDate(createdAt),
     'updatedAt': Timestamp.fromDate(updatedAt),
   };

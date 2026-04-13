@@ -20,4 +20,5 @@ class RouteNames {
   static const videoPlayer = 'videoPlayer';
   static const profile = 'profile';
   static const myTeam = 'myTeam';
+  static const notifications = 'notifications';
 }
