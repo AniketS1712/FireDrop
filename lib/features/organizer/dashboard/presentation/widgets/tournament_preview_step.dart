@@ -49,7 +49,7 @@ class TournamentPreviewStep extends StatelessWidget {
               child: Stack(
                 children: [
                    imageUrl.isNotEmpty
-                      ? Image.network(imageUrl, fit: BoxFit.cover, width: double.infinity, errorBuilder: (_, __, ___) => _FallbackBanner())
+                      ? Image.network(imageUrl, fit: BoxFit.cover, width: double.infinity, errorBuilder: (_, _, _) => _FallbackBanner())
                       : _FallbackBanner(),
                   Container(
                     decoration: BoxDecoration(

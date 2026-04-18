@@ -27,10 +27,9 @@ class QuickManagement extends StatelessWidget {
             'Quick Management',
             style: textScheme.headlineLarge?.copyWith(
               shadows: [
+                Shadow(color: colorScheme.onSecondaryFixed, blurRadius: 10),
                 Shadow(color: colorScheme.primary, blurRadius: 10),
                 Shadow(color: colorScheme.primary, blurRadius: 10),
-                Shadow(color: colorScheme.primary, blurRadius: 10),
-                Shadow(color: colorScheme.secondary, blurRadius: 20),
               ],
             ),
           ),

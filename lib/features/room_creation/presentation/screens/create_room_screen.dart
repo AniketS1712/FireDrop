@@ -614,7 +614,7 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
         hintStyle: TextStyle(
           color: Theme.of(
             context,
-          ).colorScheme.onSurfaceVariant.withOpacity(0.5),
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
         ),
         prefixIcon: Icon(
           prefixIcon,

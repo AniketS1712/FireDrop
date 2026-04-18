@@ -60,7 +60,7 @@ class DashboardHeader extends ConsumerWidget {
             child: IconButton(
               icon: Icon(
                 Icons.video_library_rounded,
-                color: colorsScheme.onSecondary,
+                color: colorsScheme.secondary,
               ),
               onPressed: () => context.pushNamed(RouteNames.videos),
             ),
@@ -75,7 +75,7 @@ class DashboardHeader extends ConsumerWidget {
             child: IconButton(
               icon: Icon(
                 Icons.notifications_none_rounded,
-                color: colorsScheme.onSecondary,
+                color: colorsScheme.secondary,
               ),
               onPressed: () => context.pushNamed(RouteNames.notifications),
             ),

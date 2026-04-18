@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,19 +41,37 @@ class _OrganizerProfileScreenState extends ConsumerState<OrganizerProfileScreen>
 
   Future<void> _pickAndUploadImage(UserModel user) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 200,
+      maxHeight: 200,
+      imageQuality: 50,
+    );
 
     if (pickedFile != null) {
       setState(() => _isUploading = true);
       try {
-        final File file = File(pickedFile.path);
+        final bytes = await pickedFile.readAsBytes();
         final uploadRepo = UploadRepository();
-        final downloadUrl = await uploadRepo.uploadAvatar(user.uid, file);
+        final avatarDataUri = await uploadRepo.uploadAvatarBytes(
+          user.uid,
+          bytes,
+        );
         await ref
             .read(authServiceProvider)
-            .updateUserAvatar(user.uid, downloadUrl);
+            .updateUserAvatar(user.uid, avatarDataUri);
+        ref.invalidate(currentUserProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Avatar updated!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } catch (e) {
         if (mounted) {
+          debugPrint("Failed to update avatar: $e");
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to update avatar: $e')),
           );
@@ -381,23 +398,32 @@ class _ProfileHeader extends StatelessWidget {
                       )
                     : user.avatarUrl.isNotEmpty
                     ? ClipOval(
-                        child: Image.network(
-                          user.avatarUrl,
-                          fit: BoxFit.cover,
-                          width: 110,
-                          height: 110,
-                          errorBuilder: (_, _, _) => Center(
-                            child: Text(
-                              initials,
-                              style: TextStyle(
-                                color: colorScheme.onPrimary,
-                                fontSize: 40,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 2,
+                        child: UploadRepository.isBase64Avatar(user.avatarUrl)
+                            ? Image.memory(
+                                UploadRepository.decodeBase64Avatar(
+                                  user.avatarUrl,
+                                ),
+                                fit: BoxFit.cover,
+                                width: 110,
+                                height: 110,
+                              )
+                            : Image.network(
+                                user.avatarUrl,
+                                fit: BoxFit.cover,
+                                width: 110,
+                                height: 110,
+                                errorBuilder: (_, _, _) => Center(
+                                  child: Text(
+                                    initials,
+                                    style: TextStyle(
+                                      color: colorScheme.onPrimary,
+                                      fontSize: 40,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
                       )
                     : Center(
                         child: Text(

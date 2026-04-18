@@ -41,7 +41,7 @@ class TournamentHero extends StatelessWidget {
               child: Image.network(
                 tournament.imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, _, __) => Container(
+                errorBuilder: (context, _, _) => Container(
                   color: colorScheme.surfaceContainerHighest,
                   child: Icon(Icons.broken_image, color: colorScheme.primary),
                 ),

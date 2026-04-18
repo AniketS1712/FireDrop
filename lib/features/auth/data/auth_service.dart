@@ -44,6 +44,7 @@ class AuthService {
   }
 
   /// Signs in with email/password and returns the full [UserModel].
+  /// Throws [UserBannedException] if the account is banned.
   Future<UserModel> signInAndGetUser({
     required String email,
     required String password,
@@ -60,7 +61,14 @@ class AuthService {
       throw Exception('User profile not found. Please contact support.');
     }
 
-    return UserModel.fromMap(doc.data()!, uid);
+    final user = UserModel.fromMap(doc.data()!, uid);
+
+    // ── Ban check: throw so UI can handle redirect ──
+    if (user.isBanned) {
+      throw UserBannedException();
+    }
+
+    return user;
   }
 
   /// Creates a new account and Firestore profile.
@@ -134,12 +142,20 @@ class AuthService {
 
   /// Ensures a Firestore user document exists for the [UserCredential].
   /// Returns the existing or newly created [UserModel].
+  /// Throws [UserBannedException] if the account is banned.
   Future<UserModel> _ensureFirestoreProfile(UserCredential cred) async {
     final uid = cred.user!.uid;
     final existing = await _firestore.collection('users').doc(uid).get();
 
     if (existing.exists && existing.data() != null) {
-      return UserModel.fromMap(existing.data()!, uid);
+      final user = UserModel.fromMap(existing.data()!, uid);
+
+      // ── Ban check: throw so UI can handle redirect ──
+      if (user.isBanned) {
+        throw UserBannedException();
+      }
+
+      return user;
     }
 
     // Derive a gamer tag from the Google display name or email prefix
@@ -207,4 +223,12 @@ class GamerTagTakenException implements Exception {
   @override
   String toString() =>
       'The gamer tag "$tag" is already taken. Please choose another.';
+}
+
+class UserBannedException implements Exception {
+  const UserBannedException();
+
+  @override
+  String toString() =>
+      'Your account has been banned. Please contact support.';
 }

@@ -70,7 +70,7 @@ class TournamentTemplatePicker extends ConsumerWidget {
                 return ListView.separated(
                   physics: const BouncingScrollPhysics(),
                   itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, i) => _TemplateItem(tournament: list[i], onTap: () => onSelect(list[i])),
                 );
               },
@@ -163,7 +163,7 @@ class _TemplateItem extends StatelessWidget {
                 width: 48,
                 height: 48,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: colorScheme.surfaceContainer, width: 48, height: 48),
+                errorBuilder: (_, _, _) => Container(color: colorScheme.surfaceContainer, width: 48, height: 48),
               ),
             ),
             const SizedBox(width: 16),

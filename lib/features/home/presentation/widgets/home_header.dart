@@ -4,13 +4,13 @@ import 'package:eagle_esports/core/theme/app_sizes.dart';
 
 class HomeHeader extends StatelessWidget {
   final String username;
-  final VoidCallback? onSearch;
+  final VoidCallback? onWallet;
   final VoidCallback? onNotifications;
 
   const HomeHeader({
     super.key,
     required this.username,
-    this.onSearch,
+    this.onWallet,
     this.onNotifications,
   });
 
@@ -68,8 +68,8 @@ class HomeHeader extends StatelessWidget {
 
         // ── Action Buttons ──
         _HeaderAction(
-          icon: Icons.search_rounded,
-          onPressed: onSearch,
+          icon: Icons.wallet_rounded,
+          onPressed: onWallet,
           colorScheme: colorScheme,
         ),
         const SizedBox(width: AppSizes.space8),

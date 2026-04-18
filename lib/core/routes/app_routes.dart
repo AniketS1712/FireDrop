@@ -18,6 +18,7 @@ import 'package:eagle_esports/features/tournament/presentation/screens/tournamen
 import 'package:eagle_esports/features/video/presentation/screens/video_player_screen.dart';
 import 'package:eagle_esports/features/video/presentation/screens/videos_screen.dart';
 import 'package:eagle_esports/features/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:eagle_esports/features/auth/presentation/screens/banned_screen.dart';
 import 'package:eagle_esports/core/routes/route_names.dart';
 import 'package:eagle_esports/core/routes/route_paths.dart';
 import 'package:go_router/go_router.dart';
@@ -130,6 +131,11 @@ class AppRoutes {
       path: RoutePaths.notifications,
       name: RouteNames.notifications,
       builder: (context, state) => const NotificationScreen(),
+    ),
+    GoRoute(
+      path: RoutePaths.banned,
+      name: RouteNames.banned,
+      builder: (context, state) => const BannedScreen(),
     ),
   ];
 }

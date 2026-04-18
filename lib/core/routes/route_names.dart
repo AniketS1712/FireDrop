@@ -21,4 +21,5 @@ class RouteNames {
   static const profile = 'profile';
   static const myTeam = 'myTeam';
   static const notifications = 'notifications';
+  static const banned = 'banned';
 }

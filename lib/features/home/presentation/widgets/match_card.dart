@@ -260,7 +260,7 @@ class MatchCard extends ConsumerWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: colorScheme.error.withAlpha(30),
+                        color: colorScheme.error.withAlpha(50),
                         borderRadius: BorderRadius.circular(AppSizes.radius16),
                         border: Border.all(
                           color: colorScheme.error.withAlpha(100),
@@ -270,7 +270,7 @@ class MatchCard extends ConsumerWidget {
                         child: Text(
                           'MATCH IN PROGRESS',
                           style: textTheme.labelLarge?.copyWith(
-                            color: colorScheme.error.withAlpha(180),
+                            color: colorScheme.error,
                             letterSpacing: 1.5,
                           ),
                         ),

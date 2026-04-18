@@ -38,7 +38,7 @@ class _TournamentShimmerState extends State<TournamentShimmer>
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       itemCount: 4,
-      separatorBuilder: (_, __) => const SizedBox(height: 20),
+      separatorBuilder: (_, _) => const SizedBox(height: 20),
       itemBuilder: (context, i) => AnimatedBuilder(
         animation: _anim,
         builder: (context, child) {

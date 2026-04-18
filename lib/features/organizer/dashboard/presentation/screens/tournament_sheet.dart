@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:eagle_esports/features/tournament/presentation/providers/tournament_providers.dart';
 import 'package:eagle_esports/shared/models/tournaments_model.dart';
-import '../widgets/tournament_sheet_header.dart';
-import '../widgets/tournament_step_indicator.dart';
-import '../widgets/tournament_template_picker.dart';
-import '../widgets/tournament_form_step.dart';
-import '../widgets/tournament_preview_step.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/widgets/tournament_sheet_header.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/widgets/tournament_step_indicator.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/widgets/tournament_template_picker.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/widgets/tournament_form_step.dart';
+import 'package:eagle_esports/features/organizer/dashboard/presentation/widgets/tournament_preview_step.dart';
 
 class TournamentSheet extends ConsumerStatefulWidget {
   final String organizerId;
@@ -108,6 +108,8 @@ class _TournamentSheetState extends ConsumerState<TournamentSheet>
       ),
     );
     if (date == null) return;
+
+    if (!mounted) return;
 
     final time = await showTimePicker(
       context: context,

@@ -9,7 +9,7 @@ class AppColorTokens {
 
   static const secondary = Color(0xFFFFFDDF);
   static const secondaryLight = Color(0xFFFFFEF3);
-  static const secondaryDark = Color(0xFF200034);
+  static const secondaryDark = Color(0xFF88856C);
 
   static const bgPrimary = Color(0xFF000000);
   static const bgSecondary = Color(0xFF1C0E24);
@@ -146,9 +146,9 @@ class AppColors {
     primaryContainer: AppColorTokens.primaryDark,
     onPrimaryContainer: AppColorTokens.primaryLight,
 
-    // Secondary — Pink/Magenta
+    // Secondary — Beige
     secondary: AppColorTokens.secondary,
-    onSecondary: Colors.white,
+    onSecondary: Colors.black,
     secondaryContainer: AppColorTokens.secondaryDark,
     onSecondaryContainer: AppColorTokens.secondaryLight,
 

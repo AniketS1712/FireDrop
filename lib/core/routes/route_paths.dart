@@ -21,4 +21,5 @@ class RoutePaths {
   static const profile = '/profile';
   static const myTeam = '/my-team';
   static const notifications = '/notifications';
+  static const banned = '/banned';
 }

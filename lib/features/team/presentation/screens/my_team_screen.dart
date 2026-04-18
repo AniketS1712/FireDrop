@@ -5,6 +5,7 @@ import 'package:eagle_esports/shared/models/tournaments_model.dart';
 import 'package:eagle_esports/shared/models/teams_model.dart';
 import 'package:eagle_esports/shared/models/users_model.dart';
 import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
+import 'package:eagle_esports/features/video/data/repositories/upload_repository.dart';
 
 class MyTeamScreen extends ConsumerStatefulWidget {
   final TournamentModel tournament;
@@ -237,7 +238,11 @@ class _MyTeamScreenState extends ConsumerState<MyTeamScreen> {
           CircleAvatar(
             backgroundColor: colorScheme.surface,
             backgroundImage: member != null && member.avatarUrl.isNotEmpty
-                ? NetworkImage(member.avatarUrl)
+                ? (UploadRepository.isBase64Avatar(member.avatarUrl)
+                      ? MemoryImage(
+                          UploadRepository.decodeBase64Avatar(member.avatarUrl),
+                        )
+                      : NetworkImage(member.avatarUrl) as ImageProvider)
                 : null,
             child: member == null || member.avatarUrl.isEmpty
                 ? Icon(Icons.person, color: colorScheme.primary)

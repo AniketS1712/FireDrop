@@ -151,7 +151,7 @@ class _TournamentManageCardState extends ConsumerState<TournamentManageCard>
                       child: Image.network(
                         t.imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+                        errorBuilder: (_, _, _) => Container(
                           color: colorScheme.surfaceContainer,
                           child: Icon(
                             Icons.sports_esports_rounded,

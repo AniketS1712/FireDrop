@@ -1,3 +1,4 @@
+import 'package:eagle_esports/features/auth/data/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:eagle_esports/core/constant/app_enums.dart';
 import 'package:eagle_esports/core/routes/route_names.dart';
@@ -58,6 +59,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (!mounted) return;
       _navigateUser(user);
+    } on UserBannedException {
+      if (!mounted) return;
+      context.goNamed(RouteNames.banned);
     } catch (e) {
       if (!mounted) return;
       _showError(_friendlyFirebaseError(e));
@@ -76,6 +80,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (!mounted) return;
       _navigateUser(user);
+    } on UserBannedException {
+      if (!mounted) return;
+      context.goNamed(RouteNames.banned);
     } catch (e) {
       if (!mounted) return;
       _showError(_friendlyFirebaseError(e));

@@ -227,7 +227,9 @@ class CashfreeService {
           final verified = await _verifyAndUpdate(existingPayment);
           if (verified.isSuccessful) return verified;
           // If verification shows it failed, allow a new payment
-        } catch (e) {}
+        } catch (e) {
+          // Ignore verification errors here as we allow a new attempt
+        }
       }
 
       // Expire any non-successful existing payment so it doesn't block

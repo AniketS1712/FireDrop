@@ -1,7 +1,8 @@
-import 'dart:io';
+import 'package:eagle_esports/core/routes/route_names.dart';
 import 'package:eagle_esports/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eagle_esports/features/auth/presentation/providers/auth_providers.dart';
 import 'package:eagle_esports/features/team/presentation/providers/team_providers.dart';
@@ -44,17 +45,35 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Future<void> _pickAndUploadImage(UserModel user) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 200,
+      maxHeight: 200,
+      imageQuality: 50,
+    );
 
     if (pickedFile != null) {
       setState(() => _isUploading = true);
       try {
-        final File file = File(pickedFile.path);
+        final bytes = await pickedFile.readAsBytes();
         final uploadRepo = UploadRepository();
-        final downloadUrl = await uploadRepo.uploadAvatar(user.uid, file);
+        final avatarDataUri = await uploadRepo.uploadAvatarBytes(
+          user.uid,
+          bytes,
+        );
         await ref
             .read(authServiceProvider)
-            .updateUserAvatar(user.uid, downloadUrl);
+            .updateUserAvatar(user.uid, avatarDataUri);
+        // Refresh the user so the new avatar shows immediately
+        ref.invalidate(currentUserProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Avatar updated!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -207,14 +226,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                                 ref
                                     .read(tournamentFilterProvider.notifier)
                                     .setFilter(TournamentFilter.joined);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Showing joined tournaments in Home',
-                                    ),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
+                                context.goNamed(RouteNames.home);
                               },
                             );
                           },

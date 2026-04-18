@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eagle_esports/shared/models/users_model.dart';
+import 'package:eagle_esports/features/video/data/repositories/upload_repository.dart';
 
 class ProfileHeader extends StatelessWidget {
   final UserModel user;
@@ -49,7 +50,12 @@ class ProfileHeader extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: colorScheme.primary, width: 2),
                   image: user.avatarUrl.isNotEmpty
-                      ? DecorationImage(image: NetworkImage(user.avatarUrl), fit: BoxFit.cover)
+                      ? DecorationImage(
+                          image: UploadRepository.isBase64Avatar(user.avatarUrl)
+                              ? MemoryImage(UploadRepository.decodeBase64Avatar(user.avatarUrl))
+                              : NetworkImage(user.avatarUrl),
+                          fit: BoxFit.cover,
+                        )
                       : null,
                   color: colorScheme.surfaceContainerHighest,
                 ),

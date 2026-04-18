@@ -42,17 +42,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCdylPJbwSb2b4NuY8DcmSQo4qDqgDQHqA',
-    appId: '1:502105268327:web:a19f8daef4a0a305ceb4c2',
+    appId: '1:502105268327:web:ffc91f267dc3a82cceb4c2',
     messagingSenderId: '502105268327',
     projectId: 'firedrop-b56e3',
     authDomain: 'firedrop-b56e3.firebaseapp.com',
     storageBucket: 'firedrop-b56e3.firebasestorage.app',
-    measurementId: 'G-XEH1CX8MXV',
+    measurementId: 'G-NZ2LHQ6YMG',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyC1FQx_1OWKHUA2IdwAj3dwsls9NEsTENI',
-    appId: '1:502105268327:android:d143a6a8f764af7cceb4c2',
+    appId: '1:502105268327:android:f5215efa6dec6516ceb4c2',
     messagingSenderId: '502105268327',
     projectId: 'firedrop-b56e3',
     storageBucket: 'firedrop-b56e3.firebasestorage.app',
@@ -60,29 +60,34 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDMq5QG3597ZwnKlpabUwsSFGEzYUvhMcs',
-    appId: '1:502105268327:ios:6b8a9e2e868f2314ceb4c2',
+    appId: '1:502105268327:ios:c928a11b11f66784ceb4c2',
     messagingSenderId: '502105268327',
     projectId: 'firedrop-b56e3',
     storageBucket: 'firedrop-b56e3.firebasestorage.app',
-    iosBundleId: 'com.example.firedrop',
+    androidClientId: '502105268327-ds3hcf797b7jp6o9ud1tin1e7n5tm435.apps.googleusercontent.com',
+    iosClientId: '502105268327-0p9mckngmtif6pbmfh86tldpefkmc1ci.apps.googleusercontent.com',
+    iosBundleId: 'com.eagle.eagle-esports',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyDMq5QG3597ZwnKlpabUwsSFGEzYUvhMcs',
-    appId: '1:502105268327:ios:6b8a9e2e868f2314ceb4c2',
+    appId: '1:502105268327:ios:9769979077da5505ceb4c2',
     messagingSenderId: '502105268327',
     projectId: 'firedrop-b56e3',
     storageBucket: 'firedrop-b56e3.firebasestorage.app',
+    androidClientId: '502105268327-ds3hcf797b7jp6o9ud1tin1e7n5tm435.apps.googleusercontent.com',
+    iosClientId: '502105268327-f2q62fiq5f8h58mgreaat37gs5vihsng.apps.googleusercontent.com',
     iosBundleId: 'com.example.firedrop',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyCdylPJbwSb2b4NuY8DcmSQo4qDqgDQHqA',
-    appId: '1:502105268327:web:4562fc2cda0ce7c9ceb4c2',
+    appId: '1:502105268327:web:f430530fb332b0dbceb4c2',
     messagingSenderId: '502105268327',
     projectId: 'firedrop-b56e3',
     authDomain: 'firedrop-b56e3.firebaseapp.com',
     storageBucket: 'firedrop-b56e3.firebasestorage.app',
-    measurementId: 'G-XL5H37TN4X',
+    measurementId: 'G-K8PLV2FSN8',
   );
+
 }

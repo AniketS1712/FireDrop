@@ -50,13 +50,29 @@ String? _redirect(Ref ref, GoRouterState state) {
   final isOnLogin = path == RoutePaths.login;
   final isOnSignup = path == RoutePaths.signup;
   final isOnForgotPassword = path == RoutePaths.forgotPassword;
+  final isOnBanned = path == RoutePaths.banned;
   final isOnPublic =
       isOnSplash || isOnLogin || isOnSignup || isOnForgotPassword;
 
   // ── Not logged in ──────────────────────────────────────────────────────────
   if (!isLoggedIn) {
+    // If they somehow landed on /banned but are now logged out, send to login
+    if (isOnBanned) return RoutePaths.login;
     // Allow splash/login/signup freely; push everything else to login
     return isOnPublic ? null : RoutePaths.login;
+  }
+
+  // ── Ban wall: highest priority after auth check ────────────────────────────
+  // Works for already-logged-in sessions too — fires on every navigation.
+  if (user.isBanned) {
+    return isOnBanned ? null : RoutePaths.banned;
+  }
+
+  // ── Banned screen is only for banned users ─────────────────────────────────
+  if (isOnBanned) {
+    final isOrganizer =
+        user.role == UserRole.organizer || user.role == UserRole.admin;
+    return isOrganizer ? RoutePaths.organizerDashboard : RoutePaths.home;
   }
 
   // ── Logged in ──────────────────────────────────────────────────────────────
@@ -83,3 +99,4 @@ String? _redirect(Ref ref, GoRouterState state) {
 
   return null; // No redirect needed
 }
+

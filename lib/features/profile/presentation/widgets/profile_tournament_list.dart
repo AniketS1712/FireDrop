@@ -94,7 +94,7 @@ class _TournamentMiniCard extends StatelessWidget {
                 width: 50,
                 height: 50,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: colorScheme.surfaceContainer, width: 50, height: 50),
+                errorBuilder: (_, _, _) => Container(color: colorScheme.surfaceContainer, width: 50, height: 50),
               ),
             ),
             const SizedBox(width: 16),
